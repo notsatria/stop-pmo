@@ -76,4 +76,7 @@ dependencies {
 
     // Serialization
     implementation(libs.kotlinx.serialization)
+
+    // Material Kolor
+    implementation(libs.materialKolor)
 }

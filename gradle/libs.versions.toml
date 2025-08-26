@@ -47,6 +47,8 @@ koin-core = { module = "io.insert-koin:koin-core" }
 koin-compose = { module = "io.insert-koin:koin-androidx-compose" }
 koin-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navigation" }
 
+materialKolor = "com.materialkolor:material-kolor:3.0.1"
+
 [bundles]
 koin = ["koin-core", "koin-compose", "koin-compose-navigation"]
 
