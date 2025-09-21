@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,20 +33,37 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
 import dev.notsatria.stop_pmo.ui.screen.dashboard.component.RecentActivityItem
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
+import dev.notsatria.stop_pmo.utils.toHHmmss
+import org.koin.androidx.compose.koinViewModel
+import kotlin.time.Duration
 
 @Composable
-fun DashboardRoute(modifier: Modifier = Modifier) {
-    DashboardScreen()
+fun DashboardRoute(modifier: Modifier = Modifier, viewModel: DashboardViewModel = koinViewModel()) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    DashboardScreen(
+        modifier = modifier,
+        elapsedTime = uiState.elapsedTime,
+        onRelapseClick = {
+            viewModel.relapse()
+        },
+        recentRelapses = uiState.recentRelapses
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun DashboardScreen(modifier: Modifier = Modifier) {
+fun DashboardScreen(
+    modifier: Modifier = Modifier,
+    elapsedTime: Duration = Duration.ZERO,
+    onRelapseClick: () -> Unit = {},
+    recentRelapses: List<RelapseEvent> = emptyList()
+) {
     val theme = LocalTheme.current
-    val recentActivityCount = 20
     Scaffold(modifier, topBar = {
         CenterTopBar(title = "Dashboard")
     }, containerColor = theme.surface) { innerPadding ->
@@ -57,12 +75,12 @@ fun DashboardScreen(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(20.dp))
-            DayCounter()
+            DayCounter(duration = elapsedTime)
             Spacer(Modifier.height(32.dp))
             Button(
                 modifier = Modifier,
                 colors = ButtonDefaults.buttonColors(containerColor = theme.buttonPrimary),
-                onClick = { /* TODO: Handle relapse logging */ }
+                onClick = onRelapseClick
             ) {
                 Text("Relapse", modifier = Modifier.padding(8.dp))
             }
@@ -79,12 +97,13 @@ fun DashboardScreen(modifier: Modifier = Modifier) {
                     .padding(start = 20.dp)
             )
             Spacer(Modifier.height(20.dp))
-            repeat(recentActivityCount) {
+            repeat(recentRelapses.size) {
                 RecentActivityItem(
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .padding(bottom = 12.dp)
+                        .padding(bottom = 12.dp),
+                    occurredAt = recentRelapses[it].occurredAt
                 )
             }
         }
@@ -92,7 +111,7 @@ fun DashboardScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun DayCounter(modifier: Modifier = Modifier) {
+private fun DayCounter(modifier: Modifier = Modifier, duration: Duration) {
     val theme = LocalTheme.current
     Box(
         modifier = modifier
@@ -107,7 +126,7 @@ private fun DayCounter(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                "101",
+                duration.inWholeDays.toString(),
                 style = TextStyle(
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Bold,
@@ -124,7 +143,7 @@ private fun DayCounter(modifier: Modifier = Modifier) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "HH:mm:ss",
+                duration.toHHmmss(),
                 style = TextStyle(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.SemiBold,

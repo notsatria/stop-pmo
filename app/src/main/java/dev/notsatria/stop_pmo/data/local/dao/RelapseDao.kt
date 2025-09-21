@@ -19,4 +19,10 @@ interface RelapseDao {
 
     @Query("DELETE FROM relapse_events")
     suspend fun clearAll()
+
+    @Query("SELECT occurredAt FROM relapse_events ORDER BY occurredAt DESC LIMIT 1")
+    fun getLastRelapseTimeFlow(): Flow<String?>
+
+    @Query("SELECT * FROM relapse_events ORDER BY occurredAt DESC LIMIT :count")
+    fun recentRelapses(count: Int): Flow<List<RelapseEventEntity>>
 }

@@ -79,4 +79,7 @@ dependencies {
 
     // Material Kolor
     implementation(libs.materialKolor)
+
+    // Datetime
+    implementation(libs.kotlinx.datetime)
 }

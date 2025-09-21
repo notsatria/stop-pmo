@@ -7,6 +7,8 @@ import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
 import dev.notsatria.stop_pmo.domain.toDomainModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 class RelapseRepositoryImpl(private val dao: RelapseDao) : RelapseRepository {
     override suspend fun logRelapse(occurredAt: String, note: String?) {
@@ -28,5 +30,18 @@ class RelapseRepositoryImpl(private val dao: RelapseDao) : RelapseRepository {
 
     override suspend fun clearAll() {
         dao.clearAll()
+    }
+
+    @OptIn(ExperimentalTime::class)
+    override fun lastRelapseTimeFlow(): Flow<Instant?> {
+        return dao.getLastRelapseTimeFlow().map {
+            it?.let { Instant.parse(it) }
+        }
+    }
+
+    override fun recentRelapses(count: Int): Flow<List<RelapseEvent>> {
+        return dao.recentRelapses(count).map { list ->
+            list.map { it.toDomainModel() }
+        }
     }
 }

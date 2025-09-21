@@ -22,9 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.notsatria.stop_pmo.R
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
+import dev.notsatria.stop_pmo.utils.toDayAgo
 
 @Composable
-fun RecentActivityItem(modifier: Modifier = Modifier) {
+fun RecentActivityItem(modifier: Modifier = Modifier, occurredAt: String) {
     val theme = LocalTheme.current
     Row(
         modifier,
@@ -48,7 +49,7 @@ fun RecentActivityItem(modifier: Modifier = Modifier) {
                 )
             )
             Text(
-                "2 days ago",
+                occurredAt.toDayAgo(),
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
