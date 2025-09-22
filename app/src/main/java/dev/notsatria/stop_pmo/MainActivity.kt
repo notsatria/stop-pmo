@@ -5,10 +5,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import dev.notsatria.stop_pmo.navigation.PMONavHost
+import dev.notsatria.stop_pmo.navigation.Screen
+import dev.notsatria.stop_pmo.ui.components.BottomNavBar
 import dev.notsatria.stop_pmo.ui.screen.dashboard.DashboardRoute
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 import dev.notsatria.stop_pmo.ui.theme.darkThemeColors
@@ -25,11 +34,24 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun App(modifier: Modifier = Modifier) {
+private fun App(
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController()
+) {
     val themeColors = if (isSystemInDarkTheme()) darkThemeColors else lightThemeColors
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val bottomBarVisibleRoutes = listOf(
+        Screen.Dashboard::class.qualifiedName,
+        Screen.History::class.qualifiedName
+    )
     CompositionLocalProvider(LocalTheme provides themeColors) {
         MaterialTheme {
-            DashboardRoute()
+            Scaffold(bottomBar = {
+                if (currentRoute in bottomBarVisibleRoutes) BottomNavBar(currentRoute = currentRoute)
+            }) { innerPadding ->
+                PMONavHost(modifier = Modifier.padding(innerPadding), navController = navController)
+            }
         }
     }
 }
