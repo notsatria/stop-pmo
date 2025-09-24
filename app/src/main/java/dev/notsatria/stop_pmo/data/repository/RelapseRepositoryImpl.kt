@@ -44,4 +44,11 @@ class RelapseRepositoryImpl(private val dao: RelapseDao) : RelapseRepository {
             list.map { it.toDomainModel() }
         }
     }
+
+    override suspend fun getRelapseHistory(
+        count: Int,
+        offset: Int
+    ): List<RelapseEvent> {
+        return dao.getRelapseHistory(count, offset).map { it.toDomainModel() }
+    }
 }

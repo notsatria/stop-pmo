@@ -16,4 +16,14 @@ object DummyData {
             )
         )
     }
+
+    fun generateRecentRelapses(): List<RelapseEvent> {
+        return List(10) { index ->
+            RelapseEvent(
+                id = index + 1,
+                occurredAt = "2023-09-${if (index + 1 < 10) "0${index + 1}" else index + 1}T12:00:00Z",
+                note = if (index % 2 == 0) "Relapsed on day ${index + 1}" else null
+            )
+        }
+    }
 }

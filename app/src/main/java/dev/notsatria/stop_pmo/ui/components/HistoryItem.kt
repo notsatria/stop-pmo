@@ -1,11 +1,10 @@
-package dev.notsatria.stop_pmo.ui.screen.dashboard.component
+package dev.notsatria.stop_pmo.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -25,8 +24,9 @@ import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 import dev.notsatria.stop_pmo.utils.toDayAgo
 
 @Composable
-fun RecentActivityItem(modifier: Modifier = Modifier, occurredAt: String) {
+fun HistoryItem(modifier: Modifier = Modifier, occurredAt: String, type: String) {
     val theme = LocalTheme.current
+    val subtitle = if (type == HistoryItemType.RECENT) occurredAt.toDayAgo() else occurredAt
     Row(
         modifier,
         verticalAlignment = Alignment.CenterVertically
@@ -36,7 +36,12 @@ fun RecentActivityItem(modifier: Modifier = Modifier, occurredAt: String) {
                 .clip(CircleShape)
                 .background(color = theme.buttonPrimary.copy(alpha = 0.2f))
         ) {
-            Icon(painterResource(R.drawable.ic_calendar), null, tint = theme.buttonPrimary, modifier = Modifier.padding(12.dp))
+            Icon(
+                painterResource(R.drawable.ic_calendar),
+                null,
+                tint = theme.buttonPrimary,
+                modifier = Modifier.padding(12.dp)
+            )
         }
         Spacer(Modifier.width(8.dp))
         Column {
@@ -49,7 +54,7 @@ fun RecentActivityItem(modifier: Modifier = Modifier, occurredAt: String) {
                 )
             )
             Text(
-                occurredAt.toDayAgo(),
+                subtitle,
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
@@ -58,4 +63,9 @@ fun RecentActivityItem(modifier: Modifier = Modifier, occurredAt: String) {
             )
         }
     }
+}
+
+object HistoryItemType {
+    const val RECENT = "recent"
+    const val HISTORY = "history"
 }

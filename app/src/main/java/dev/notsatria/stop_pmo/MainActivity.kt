@@ -48,9 +48,12 @@ private fun App(
     CompositionLocalProvider(LocalTheme provides themeColors) {
         MaterialTheme {
             Scaffold(bottomBar = {
-                if (currentRoute in bottomBarVisibleRoutes) BottomNavBar(currentRoute = currentRoute)
+                if (currentRoute in bottomBarVisibleRoutes) BottomNavBar(
+                    currentRoute = currentRoute,
+                    navController = navController
+                )
             }) { innerPadding ->
-                PMONavHost(modifier = Modifier.padding(innerPadding), navController = navController)
+                PMONavHost(modifier = Modifier, navController = navController)
             }
         }
     }

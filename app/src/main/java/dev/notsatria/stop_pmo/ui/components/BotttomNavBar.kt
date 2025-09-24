@@ -1,29 +1,37 @@
 package dev.notsatria.stop_pmo.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import dev.notsatria.stop_pmo.R
 import dev.notsatria.stop_pmo.navigation.NavItem
 import dev.notsatria.stop_pmo.navigation.Screen
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 
 @Composable
-fun BottomNavBar(modifier: Modifier = Modifier, currentRoute: String?) {
+fun BottomNavBar(
+    modifier: Modifier = Modifier,
+    currentRoute: String?,
+    navController: NavHostController
+) {
     val theme = LocalTheme.current
     val navItems = listOf(
         NavItem(
@@ -37,45 +45,57 @@ fun BottomNavBar(modifier: Modifier = Modifier, currentRoute: String?) {
             screen = Screen.History
         ),
     )
-    Surface(
-        modifier
-            .fillMaxWidth()
-            .height(80.dp),
-        color = theme.surface,
-    ) {
-        Box(Modifier) {
-            HorizontalDivider(Modifier.fillMaxWidth(), color = theme.iconDisabled)
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                navItems.map { item ->
-                    BottomNavItem(
-                        item = item,
-                        isSelected = currentRoute == item.screen::class.qualifiedName
+    NavigationBar(modifier, windowInsets = NavigationBarDefaults.windowInsets, containerColor = theme.surface) {
+        navItems.map { item ->
+            NavigationBarItem(
+                selected = currentRoute == item.screen::class.qualifiedName,
+                onClick = {
+                    navController.navigate(item.screen) {
+                        popUpTo(navController.graph.id) {
+                            saveState = true
+                        }
+                        restoreState = true
+                        launchSingleTop = true
+                    }
+                },
+                icon = {
+                    Icon(
+                        painterResource(item.icon),
+                        contentDescription = item.label,
+                        tint = if (currentRoute == item.screen::class.qualifiedName) theme.iconPrimary else theme.iconDisabled
                     )
-                }
-            }
+                },
+                label = {
+                    Text(
+                        item.label,
+                        color = if (currentRoute == item.screen::class.qualifiedName) theme.iconPrimary else theme.iconDisabled
+                    )
+                },
+                alwaysShowLabel = true,
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = theme.iconPrimary,
+                    unselectedIconColor = theme.iconDisabled,
+                    selectedTextColor = theme.iconPrimary,
+                    unselectedTextColor = theme.iconDisabled,
+                    indicatorColor = theme.iconPrimary.copy(alpha = 0.12f)
+                )
+            )
         }
     }
 }
 
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
-fun BottomNavItem(modifier: Modifier = Modifier, item: NavItem, isSelected: Boolean) {
-    val theme = LocalTheme.current
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Icon(
-            painterResource(item.icon),
-            contentDescription = item.label,
-            modifier = modifier,
-            tint = if (isSelected) theme.iconPrimary else theme.iconDisabled
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(item.label, color = if (isSelected) theme.iconPrimary else theme.iconDisabled)
+private fun Preview() {
+    Surface(Modifier.fillMaxSize()) {
+        Column {
+            Spacer(Modifier.height(50.dp))
+            Box(Modifier.weight(1f))
+            HorizontalDivider()
+            BottomNavBar(
+                currentRoute = Screen.Dashboard::class.qualifiedName,
+                navController = rememberNavController()
+            )
+        }
     }
 }

@@ -36,8 +36,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
-import dev.notsatria.stop_pmo.ui.screen.dashboard.component.RecentActivityItem
+import dev.notsatria.stop_pmo.ui.components.HistoryItem
+import dev.notsatria.stop_pmo.ui.components.HistoryItemType
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
+import dev.notsatria.stop_pmo.utils.DummyData
 import dev.notsatria.stop_pmo.utils.toHHmmss
 import org.koin.androidx.compose.koinViewModel
 import kotlin.time.Duration
@@ -98,12 +100,13 @@ fun DashboardScreen(
             )
             Spacer(Modifier.height(20.dp))
             repeat(recentRelapses.size) {
-                RecentActivityItem(
+                HistoryItem(
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
                         .padding(bottom = 12.dp),
-                    occurredAt = recentRelapses[it].occurredAt
+                    occurredAt = recentRelapses[it].occurredAt,
+                    type = HistoryItemType.RECENT
                 )
             }
         }
@@ -158,6 +161,6 @@ private fun DayCounter(modifier: Modifier = Modifier, duration: Duration) {
 @Composable
 private fun PreviewDark() {
     MaterialTheme {
-        DashboardScreen()
+        DashboardScreen(recentRelapses = DummyData.generateRecentRelapses())
     }
 }

@@ -1,5 +1,16 @@
 package dev.notsatria.stop_pmo.utils
 
+import android.os.Build
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.format.DateTimeFormat
+import kotlinx.datetime.toLocalDateTime
+import java.text.SimpleDateFormat
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalQueries.zoneId
+import java.util.Date
 import java.util.Locale
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -16,7 +27,7 @@ fun Duration.toHHmmss(): String {
 @OptIn(ExperimentalTime::class)
 fun String.toDayAgo(): String {
     try {
-        val duration =  Clock.System.now() - Instant.parse(this)
+        val duration = Clock.System.now() - Instant.parse(this)
         val day = duration.inWholeDays
         return if (day == 1L) {
             "$day day ago"

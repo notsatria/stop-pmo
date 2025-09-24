@@ -5,6 +5,7 @@ import dev.notsatria.stop_pmo.data.local.dao.RelapseDao
 import dev.notsatria.stop_pmo.data.repository.RelapseRepositoryImpl
 import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
 import dev.notsatria.stop_pmo.ui.screen.dashboard.DashboardViewModel
+import dev.notsatria.stop_pmo.ui.screen.history.HistoryViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -27,4 +28,5 @@ val repositoryModule = module {
 
 val viewModelModule = module {
     viewModelOf(::DashboardViewModel)
+    viewModelOf(::HistoryViewModel)
 }
