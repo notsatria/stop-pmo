@@ -43,7 +43,8 @@ private fun App(
     val currentRoute = navBackStackEntry?.destination?.route
     val bottomBarVisibleRoutes = listOf(
         Screen.Dashboard::class.qualifiedName,
-        Screen.History::class.qualifiedName
+        Screen.History::class.qualifiedName,
+        Screen.Settings::class.qualifiedName
     )
     CompositionLocalProvider(LocalTheme provides themeColors) {
         MaterialTheme {

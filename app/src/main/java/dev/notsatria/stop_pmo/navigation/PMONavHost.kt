@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import dev.notsatria.stop_pmo.ui.screen.dashboard.DashboardRoute
 import dev.notsatria.stop_pmo.ui.screen.history.HistoryRoute
+import dev.notsatria.stop_pmo.ui.screen.settings.SettingRoute
 
 @Composable
 fun PMONavHost(modifier: Modifier = Modifier, navController: NavHostController) {
@@ -27,5 +28,8 @@ private fun NavGraphBuilder.graph(navController: NavController) {
     }
     composable<Screen.History> {
         HistoryRoute()
+    }
+    composable<Screen.Settings> {
+        SettingRoute()
     }
 }

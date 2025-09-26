@@ -44,8 +44,17 @@ fun BottomNavBar(
             label = "History",
             screen = Screen.History
         ),
+        NavItem(
+            icon = R.drawable.ic_settings,
+            label = "Settings",
+            screen = Screen.Settings
+        ),
     )
-    NavigationBar(modifier, windowInsets = NavigationBarDefaults.windowInsets, containerColor = theme.surface) {
+    NavigationBar(
+        modifier,
+        windowInsets = NavigationBarDefaults.windowInsets,
+        containerColor = theme.surface
+    ) {
         navItems.map { item ->
             NavigationBarItem(
                 selected = currentRoute == item.screen::class.qualifiedName,

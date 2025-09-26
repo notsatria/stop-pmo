@@ -12,6 +12,8 @@ data class CustomTheme(
     val iconSecondary: Color,
     val buttonPrimary: Color,
     val buttonDisabled: Color,
+    val settingItemBackground: Color,
+    val divider: Color,
     val isLight: Boolean
 )
 
@@ -24,6 +26,8 @@ val lightThemeColors = CustomTheme(
     iconSecondary = Color(0xFF717785),
     buttonPrimary = Color(0xFF6C7381),
     buttonDisabled = Color(0xFF707785),
+    settingItemBackground = Color.White,
+    divider = Color(0xFFF8F8F9),
     isLight = true
 )
 
@@ -37,6 +41,8 @@ val darkThemeColors = CustomTheme(
     iconSecondary = Color(0xFF989FAB),
     buttonPrimary = Color(0xFF1193D4),
     buttonDisabled = Color(0xFF6B7280),
+    settingItemBackground = Color(0xFF1C272D),
+    divider = Color(0xFF253035),
     isLight = false
 )
 
