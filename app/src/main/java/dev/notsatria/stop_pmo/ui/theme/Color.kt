@@ -13,6 +13,8 @@ data class CustomTheme(
     val buttonPrimary: Color,
     val buttonDisabled: Color,
     val settingItemBackground: Color,
+    val streakBackground: Color = Color(0xFFFFEDD5),
+    val streakForeground: Color = Color(0xFFF9771C),
     val divider: Color,
     val isLight: Boolean
 )

@@ -34,7 +34,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
 import dev.notsatria.stop_pmo.ui.components.HistoryItem
 import dev.notsatria.stop_pmo.ui.components.HistoryItemType
@@ -49,11 +48,10 @@ fun DashboardRoute(modifier: Modifier = Modifier, viewModel: DashboardViewModel 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     DashboardScreen(
         modifier = modifier,
-        elapsedTime = uiState.elapsedTime,
         onRelapseClick = {
             viewModel.relapse()
         },
-        recentRelapses = uiState.recentRelapses
+        uiState = uiState
     )
 }
 
@@ -61,13 +59,12 @@ fun DashboardRoute(modifier: Modifier = Modifier, viewModel: DashboardViewModel 
 @Composable
 fun DashboardScreen(
     modifier: Modifier = Modifier,
-    elapsedTime: Duration = Duration.ZERO,
     onRelapseClick: () -> Unit = {},
-    recentRelapses: List<RelapseEvent> = emptyList()
+    uiState: DashboardState = DashboardState()
 ) {
     val theme = LocalTheme.current
     Scaffold(modifier, topBar = {
-        CenterTopBar(title = "Dashboard")
+        CenterTopBar(title = "Dashboard", streakCount = uiState.currentStreak, isStreakVisible = true)
     }, containerColor = theme.surface) { innerPadding ->
         Column(
             modifier = Modifier
@@ -77,7 +74,7 @@ fun DashboardScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(20.dp))
-            DayCounter(duration = elapsedTime)
+            DayCounter(duration = uiState.elapsedTime)
             Spacer(Modifier.height(32.dp))
             Button(
                 modifier = Modifier,
@@ -99,13 +96,13 @@ fun DashboardScreen(
                     .padding(start = 20.dp)
             )
             Spacer(Modifier.height(20.dp))
-            repeat(recentRelapses.size) {
+            repeat(uiState.recentRelapses.size) {
                 HistoryItem(
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
                         .padding(bottom = 12.dp),
-                    occurredAt = recentRelapses[it].occurredAt,
+                    occurredAt = uiState.recentRelapses[it].occurredAt,
                     type = HistoryItemType.RECENT
                 )
             }
@@ -161,6 +158,6 @@ private fun DayCounter(modifier: Modifier = Modifier, duration: Duration) {
 @Composable
 private fun PreviewDark() {
     MaterialTheme {
-        DashboardScreen(recentRelapses = DummyData.generateRecentRelapses())
+        DashboardScreen(uiState = DashboardState(recentRelapses = DummyData.generateRecentRelapses()))
     }
 }

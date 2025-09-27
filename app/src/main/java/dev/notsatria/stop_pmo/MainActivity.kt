@@ -28,14 +28,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            App()
+            StopPmoApp()
         }
     }
 }
 
 @Composable
-private fun App(
-    modifier: Modifier = Modifier,
+private fun StopPmoApp(
     navController: NavHostController = rememberNavController()
 ) {
     val themeColors = if (isSystemInDarkTheme()) darkThemeColors else lightThemeColors

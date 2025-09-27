@@ -8,7 +8,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
 
-class StopPMOApp : Application() {
+class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
@@ -17,7 +17,7 @@ class StopPMOApp : Application() {
         }
 
         startKoin {
-            androidContext(this@StopPMOApp)
+            androidContext(this@App)
 
             modules(
                 databaseModule,

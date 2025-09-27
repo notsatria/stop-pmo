@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
+import dev.notsatria.stop_pmo.utils.getCurrentStreak
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.koin.core.KoinApplication.Companion.init
 import timber.log.Timber.Forest.d
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -50,7 +52,12 @@ class DashboardViewModel(val repository: RelapseRepository) : ViewModel() {
             if (base == null) flowOf(Duration.ZERO)
             else tickerFlow().map {
                 val now = Clock.System.now()
-                now - base
+                getCurrentStreak(lastRelapse = base, now = now).let {
+                    _uiState.update { state ->
+                        state.copy(currentStreak = it)
+                    } // Update current streak
+                    now - base
+                }
             }
         }
 
