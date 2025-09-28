@@ -1,37 +1,28 @@
 package dev.notsatria.stop_pmo.ui.screen.history
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.notsatria.stop_pmo.R
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
+import dev.notsatria.stop_pmo.ui.components.EmptyStateView
 import dev.notsatria.stop_pmo.ui.components.HistoryItem
 import dev.notsatria.stop_pmo.ui.components.HistoryItemType
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
@@ -40,14 +31,20 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun HistoryRoute(modifier: Modifier = Modifier, viewModel: HistoryViewModel = koinViewModel()) {
+fun HistoryRoute(
+    modifier: Modifier = Modifier,
+    viewModel: HistoryViewModel = koinViewModel(),
+    onNavigateToDashboard: () -> Unit = {}
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     HistoryScreen(
         modifier = modifier,
         uiState = uiState,
         onLoadHistory = {
             viewModel.loadNextPage()
-        }
+        },
+        onRelapseClick = onNavigateToDashboard
     )
 }
 
@@ -56,6 +53,7 @@ fun HistoryScreen(
     modifier: Modifier = Modifier,
     uiState: HistoryUiState = HistoryUiState(),
     onLoadHistory: () -> Unit = {},
+    onRelapseClick: () -> Unit = {}
 ) {
     val theme = LocalTheme.current
     val listState = rememberLazyListState()
@@ -75,7 +73,7 @@ fun HistoryScreen(
             }
     }
     Scaffold(
-        modifier,
+        modifier.fillMaxSize(),
         topBar = {
             CenterTopBar(title = "Relapase History")
         },
@@ -84,8 +82,13 @@ fun HistoryScreen(
         LazyColumn(
             Modifier
                 .fillMaxSize()
-                .padding(innerPadding), state = listState
+                .padding(innerPadding),
+            state = listState,
+            verticalArrangement = if (uiState.relapseHistory.isEmpty()) Arrangement.Center else Arrangement.Top
         ) {
+            if (!uiState.relapseHistory.isEmpty()) {
+                item { Spacer(Modifier.height(20.dp)) }
+            }
             itemsIndexed(uiState.relapseHistory) { index, history ->
                 HistoryItem(
                     Modifier
@@ -96,63 +99,18 @@ fun HistoryScreen(
                     type = HistoryItemType.HISTORY
                 )
                 if (index == uiState.relapseHistory.lastIndex) {
-                    Box(modifier = Modifier.height( 20.dp))
+                    Box(modifier = Modifier.height(20.dp))
                 }
             }
-            item("footer") {
-                when {
-                    uiState.isLoading -> Box(
-                        Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
 
-                    uiState.pageState.endReached -> Box(
-                        Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "No more data",
-                            style = TextStyle(
-                                fontWeight = FontWeight.SemiBold,
-                                color = theme.textSecondary
-                            )
-                        )
-                    }
+            if (uiState.relapseHistory.isEmpty()) {
+                item {
+                    EmptyStateView(
+                        onRelapseClick = onRelapseClick,
+                        isButtonRelapseVisible = true
+                    )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun MonthYearRow(
-    modifier: Modifier = Modifier,
-    onPreviousClick: () -> Unit = {},
-    onNextClick: () -> Unit = {},
-    date: String = "Sept 2025"
-) {
-    val theme = LocalTheme.current
-    Row(modifier) {
-        IconButton(onClick = onPreviousClick) {
-            Icon(
-                painter = painterResource(R.drawable.ic_arrow_left),
-                contentDescription = "Previous month",
-                tint = theme.iconPrimary
-            )
-        }
-        Text(
-            date,
-            modifier = Modifier.align(Alignment.CenterVertically),
-            style = TextStyle(fontWeight = FontWeight.SemiBold, color = theme.textPrimary)
-        )
-        IconButton(onClick = onNextClick) {
-            Icon(
-                painter = painterResource(R.drawable.ic_arrow_right),
-                contentDescription = "Previous month",
-                tint = theme.iconPrimary
-            )
         }
     }
 }
@@ -162,5 +120,13 @@ private fun MonthYearRow(
 fun HistoryScreenPreview(modifier: Modifier = Modifier) {
     MaterialTheme {
         HistoryScreen(uiState = HistoryUiState(DummyData.generateRecentRelapses()))
+    }
+}
+
+@Preview
+@Composable
+private fun EmptyPreview() {
+    MaterialTheme {
+        HistoryScreen { }
     }
 }

@@ -2,16 +2,11 @@ package dev.notsatria.stop_pmo.ui.screen.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.notsatria.stop_pmo.di.repositoryModule
 import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -33,36 +28,42 @@ class HistoryViewModel(private val repository: RelapseRepository) : ViewModel() 
     val uiState = _uiState.asStateFlow()
 
     init {
-        loadNextPage()
+        observeRelapseHistory()
     }
 
-    fun loadNextPage() {
-        val uiState = _uiState.value
-        if (uiState.isLoading || uiState.pageState.endReached) return
-
+    private fun observeRelapseHistory() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-            runCatching {
-                repository.getRelapseHistory(
-                    count = uiState.pageState.pageSize,
-                    offset = uiState.pageState.offset
-                )
-            }.onSuccess { newData ->
-                val endReached = newData.size < uiState.pageState.pageSize
-                _uiState.update {
-                    it.copy(
-                        relapseHistory = it.relapseHistory + newData,
-                        pageState = it.pageState.copy(
-                            offset = it.pageState.offset + newData.size,
-                            endReached = endReached
-                        ),
-                        isLoading = false
+            repository.getRelapseHistory(
+                count = Int.MAX_VALUE,
+                offset = 0
+            ).collect { allRelapses ->
+                _uiState.update { currentState ->
+                    val pageState = currentState.pageState
+                    val itemsToShow = allRelapses.take(pageState.offset + pageState.pageSize)
+                    val endReached = itemsToShow.size == allRelapses.size
+
+                    currentState.copy(
+                        relapseHistory = itemsToShow,
+                        pageState = pageState.copy(endReached = endReached),
+                        isLoading = false,
+                        error = null
                     )
                 }
-            }.onFailure { error ->
-                _uiState.update { it.copy(isLoading = false, error = error) }
             }
         }
     }
 
+    fun loadNextPage() {
+        val currentUiState = _uiState.value
+        if (currentUiState.isLoading || currentUiState.pageState.endReached) return
+
+        _uiState.update {
+            it.copy(
+                isLoading = true,
+                pageState = it.pageState.copy(
+                    offset = it.pageState.offset + it.pageState.pageSize
+                )
+            )
+        }
+    }
 }

@@ -9,12 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,32 +34,33 @@ fun CenterTopBar(
     streakCount: Int = 0
 ) {
     val theme = LocalTheme.current
-    Box(
-        modifier
-            .fillMaxWidth()
-            .height(TopAppBarDefaults.TopAppBarExpandedHeight)
-            .windowInsetsPadding(TopAppBarDefaults.windowInsets)
-            .background(theme.surface)
-    ) {
-        if (isStreakVisible) StreakChip(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 4.dp),
-            streakCount = streakCount
-        )
-        Row(
-            Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+    Surface(modifier.fillMaxWidth(), color = theme.surface) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(TopAppBarDefaults.TopAppBarExpandedHeight + 16.dp)
+                .windowInsetsPadding(TopAppBarDefaults.windowInsets)
         ) {
-            Text(
-                title,
-                style = TextStyle(
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp,
-                    color = theme.textPrimary
-                )
+            if (isStreakVisible) StreakChip(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 4.dp),
+                streakCount = streakCount
             )
+            Row(
+                Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    title,
+                    style = TextStyle(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 20.sp,
+                        color = theme.textPrimary
+                    )
+                )
+            }
         }
     }
 }

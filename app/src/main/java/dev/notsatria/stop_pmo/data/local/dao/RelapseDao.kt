@@ -27,5 +27,5 @@ interface RelapseDao {
     fun recentRelapses(count: Int): Flow<List<RelapseEventEntity>>
 
     @Query("SELECT * FROM relapse_events ORDER BY occurredAt DESC LIMIT :count OFFSET :offset")
-    suspend fun getRelapseHistory(count: Int, offset: Int): List<RelapseEventEntity>
+    fun getRelapseHistory(count: Int, offset: Int): Flow<List<RelapseEventEntity>>
 }

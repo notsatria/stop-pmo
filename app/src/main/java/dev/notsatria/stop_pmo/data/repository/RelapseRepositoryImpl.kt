@@ -45,10 +45,11 @@ class RelapseRepositoryImpl(private val dao: RelapseDao) : RelapseRepository {
         }
     }
 
-    override suspend fun getRelapseHistory(
+    override fun getRelapseHistory(
         count: Int,
         offset: Int
-    ): List<RelapseEvent> {
-        return dao.getRelapseHistory(count, offset).map { it.toDomainModel() }
+    ): Flow<List<RelapseEvent>> {
+        return dao.getRelapseHistory(count, offset)
+            .map { relapseFlow -> relapseFlow.map { it.toDomainModel() } }
     }
 }

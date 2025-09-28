@@ -1,6 +1,7 @@
 package dev.notsatria.stop_pmo.ui.screen.dashboard
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -35,10 +36,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
+import dev.notsatria.stop_pmo.ui.components.EmptyStateView
 import dev.notsatria.stop_pmo.ui.components.HistoryItem
 import dev.notsatria.stop_pmo.ui.components.HistoryItemType
+import dev.notsatria.stop_pmo.ui.theme.CustomTheme
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 import dev.notsatria.stop_pmo.utils.DummyData
+import dev.notsatria.stop_pmo.utils.getBottomNavHeight
 import dev.notsatria.stop_pmo.utils.toHHmmss
 import org.koin.androidx.compose.koinViewModel
 import kotlin.time.Duration
@@ -60,11 +64,15 @@ fun DashboardRoute(modifier: Modifier = Modifier, viewModel: DashboardViewModel 
 fun DashboardScreen(
     modifier: Modifier = Modifier,
     onRelapseClick: () -> Unit = {},
-    uiState: DashboardState = DashboardState()
+    uiState: DashboardState = DashboardState(),
+    theme: CustomTheme = LocalTheme.current
 ) {
-    val theme = LocalTheme.current
     Scaffold(modifier, topBar = {
-        CenterTopBar(title = "Dashboard", streakCount = uiState.currentStreak, isStreakVisible = true)
+        CenterTopBar(
+            title = "Dashboard",
+            streakCount = uiState.currentStreak,
+            isStreakVisible = true
+        )
     }, containerColor = theme.surface) { innerPadding ->
         Column(
             modifier = Modifier
@@ -81,7 +89,11 @@ fun DashboardScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = theme.buttonPrimary),
                 onClick = onRelapseClick
             ) {
-                Text("Relapse", modifier = Modifier.padding(8.dp))
+                Text(
+                    "Log Relapse",
+                    modifier = Modifier.padding(8.dp),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+                )
             }
             Spacer(Modifier.height(24.dp))
             Text(
@@ -96,16 +108,21 @@ fun DashboardScreen(
                     .padding(start = 20.dp)
             )
             Spacer(Modifier.height(20.dp))
-            repeat(uiState.recentRelapses.size) {
-                HistoryItem(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .padding(bottom = 12.dp),
-                    occurredAt = uiState.recentRelapses[it].occurredAt,
-                    type = HistoryItemType.RECENT
-                )
+            if (uiState.recentRelapses.isEmpty()) {
+                EmptyStateView()
+            } else {
+                repeat(uiState.recentRelapses.size) {
+                    HistoryItem(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                            .padding(bottom = 12.dp),
+                        occurredAt = uiState.recentRelapses[it].occurredAt,
+                        type = HistoryItemType.RECENT
+                    )
+                }
             }
+            Spacer(Modifier.height(getBottomNavHeight() + 60.dp))
         }
     }
 }
@@ -159,5 +176,13 @@ private fun DayCounter(modifier: Modifier = Modifier, duration: Duration) {
 private fun PreviewDark() {
     MaterialTheme {
         DashboardScreen(uiState = DashboardState(recentRelapses = DummyData.generateRecentRelapses()))
+    }
+}
+
+@Preview
+@Composable
+private fun EmptyPreview() {
+    MaterialTheme {
+        DashboardScreen()
     }
 }

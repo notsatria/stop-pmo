@@ -16,6 +16,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,9 +53,17 @@ fun BottomNavBar(
         ),
     )
     NavigationBar(
-        modifier,
+        modifier.drawBehind {
+            drawLine(
+                theme.divider,
+                start = Offset(0f, 0f),
+                end = Offset(size.width, 0f),
+                strokeWidth = 3f
+            )
+        },
         windowInsets = NavigationBarDefaults.windowInsets,
-        containerColor = theme.surface
+        containerColor = theme.surface,
+        tonalElevation = NavigationBarDefaults.Elevation + 4.dp,
     ) {
         navItems.map { item ->
             NavigationBarItem(

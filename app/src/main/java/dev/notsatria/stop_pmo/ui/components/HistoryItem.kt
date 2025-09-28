@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.notsatria.stop_pmo.R
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
+import dev.notsatria.stop_pmo.utils.formatDate
 import dev.notsatria.stop_pmo.utils.toDayAgo
 
 @Composable
@@ -53,8 +55,9 @@ fun HistoryItem(modifier: Modifier = Modifier, occurredAt: String, type: String)
                     color = theme.textPrimary
                 )
             )
+            Spacer(Modifier.height(2.dp))
             Text(
-                subtitle,
+                if (type == HistoryItemType.HISTORY) subtitle.formatDate() else subtitle,
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,

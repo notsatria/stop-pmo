@@ -1,15 +1,6 @@
 package dev.notsatria.stop_pmo.utils
 
-import android.os.Build
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format
-import kotlinx.datetime.format.DateTimeFormat
-import kotlinx.datetime.toLocalDateTime
 import java.text.SimpleDateFormat
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalQueries.zoneId
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Clock
@@ -29,12 +20,53 @@ fun String.toDayAgo(): String {
     try {
         val duration = Clock.System.now() - Instant.parse(this)
         val day = duration.inWholeDays
-        return if (day == 1L) {
-            "$day day ago"
-        } else {
-            "$day days ago"
+        return when  {
+            day < 1L -> {
+                val hours = duration.inWholeHours
+                if (hours < 1L) {
+                    val minutes = duration.inWholeMinutes
+                    if (minutes < 1L) {
+                        "just now"
+                    } else if (minutes == 1L) {
+                        "$minutes minute ago"
+                    } else {
+                        "$minutes minutes ago"
+                    }
+                } else if (hours == 1L) {
+                    "$hours hour ago"
+                } else {
+                    "$hours hours ago"
+                }
+            }
+            day == 1L -> {
+                "$day day ago"
+            }
+            else -> {
+                "$day days ago"
+            }
         }
     } catch (_: Exception) {
         return "unknown"
+    }
+}
+
+val defaultDateFormat = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
+val timeFormat = SimpleDateFormat("HH:mm", Locale.ENGLISH)
+
+@OptIn(ExperimentalTime::class)
+fun String.formatDate(): String {
+    try {
+        val instant = Instant.parse(this)
+        val date = Date(instant.toEpochMilliseconds())
+        val result = buildString {
+            append(defaultDateFormat.format(date))
+            append(" ")
+            append("at")
+            append(" ")
+            append(timeFormat.format(date))
+        }
+        return result
+    } catch (_: Exception) {
+        return this
     }
 }

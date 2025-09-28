@@ -10,8 +10,9 @@ interface RelapseRepository {
     suspend fun lastRelapse(): RelapseEvent?
     fun allRelapseFlow(): Flow<List<RelapseEvent>>
     suspend fun clearAll()
+
     @OptIn(ExperimentalTime::class)
     fun lastRelapseTimeFlow(): Flow<Instant?>
     fun recentRelapses(count: Int): Flow<List<RelapseEvent>>
-    suspend fun getRelapseHistory(count: Int, offset: Int): List<RelapseEvent>
+    fun getRelapseHistory(count: Int, offset: Int): Flow<List<RelapseEvent>>
 }

@@ -52,7 +52,7 @@ private fun StopPmoApp(
                     currentRoute = currentRoute,
                     navController = navController
                 )
-            }) { innerPadding ->
+            }) { _ ->
                 PMONavHost(modifier = Modifier, navController = navController)
             }
         }
