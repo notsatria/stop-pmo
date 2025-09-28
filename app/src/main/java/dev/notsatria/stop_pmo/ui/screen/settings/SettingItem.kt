@@ -1,7 +1,6 @@
 package dev.notsatria.stop_pmo.ui.screen.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,17 +29,17 @@ import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 @Composable
 fun SettingItem(
     modifier: Modifier = Modifier,
-    setting: Setting
+    setting: Setting,
+    onToggleClick: ((isEnabled: Boolean, title: String) -> Unit)
 ) {
     val theme = LocalTheme.current
-    val hasToggle = setting.isEnabled != null && setting.onToggle != null
-    val hasClick = setting.onClick != null
+    val hasToggle = setting.isEnabled != null
 
     Box(
         modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .clickable(enabled = hasClick) { if (hasClick) setting.onClick?.invoke() }
+//            .clickable(enabled = hasClick) { if (hasClick) setting.onClick.invoke() }
             .background(theme.settingItemBackground)
     ) {
         Row(
@@ -60,16 +59,15 @@ fun SettingItem(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "Enable or disable push notifications",
+                    setting.description ?: "",
                     style = TextStyle(fontSize = 14.sp, color = theme.textSecondary)
                 )
             }
             Spacer(Modifier.weight(1f))
             if (hasToggle) {
-                val checked = setting.isEnabled
                 Switch(
-                    checked = checked,
-                    onCheckedChange = {},
+                    checked = setting.isEnabled,
+                    onCheckedChange = { onToggleClick(it, setting.title) },
                     modifier = Modifier,
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = theme.buttonPrimary,

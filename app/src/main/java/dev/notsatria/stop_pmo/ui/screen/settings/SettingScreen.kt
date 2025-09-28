@@ -1,7 +1,6 @@
 package dev.notsatria.stop_pmo.ui.screen.settings
 
 import android.content.res.Configuration
-import android.widget.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -19,9 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,74 +32,41 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.notsatria.stop_pmo.R
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
-
-data class Setting(
-    val id: String = java.util.UUID.randomUUID().toString(),
-    val group: String,
-    val title: String,
-    val description: String? = null,
-    val isEnabled: Boolean? = null,
-    val onToggle: ((Boolean) -> Unit)? = null,
-    val onClick: (() -> Unit)? = null,
-)
-
-private val settings = listOf(
-    Setting(
-        group = "Notifications",
-        title = "Push Notifications",
-        description = "Enable or disable push notifications",
-        isEnabled = true,
-        onToggle = {}
-    ),
-    Setting(
-        group = "Theme",
-        title = "Dark Mode",
-        description = "Enable or disable dark mode",
-        isEnabled = true,
-        onToggle = {}
-    ),
-    Setting(
-        group = "More",
-        title = "Privacy Policy",
-        onClick = {}
-    ),
-    Setting(
-        group = "More",
-        title = "Terms of Service",
-        onClick = {}
-    ),
-    Setting(
-        group = "More",
-        title = "Send Feedback",
-        onClick = {}
-    ),
-    Setting(
-        group = "-",
-        title = "App Version",
-        onClick = {}
-    ),
-)
+import dev.notsatria.stop_pmo.utils.UiMode
+import org.koin.androidx.compose.koinViewModel
+import java.util.UUID
 
 @Composable
-fun SettingRoute(modifier: Modifier = Modifier) {
-    SettingScreen(modifier)
+fun SettingRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = koinViewModel()) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    SettingScreen(
+        modifier,
+        uiState = uiState,
+        onToggle = { isEnabled, title ->
+            createOnToggleHandler(title, isEnabled, viewModel)
+        }
+    )
 }
 
 @Composable
-fun SettingScreen(modifier: Modifier = Modifier) {
+fun SettingScreen(
+    modifier: Modifier = Modifier,
+    uiState: SettingState = SettingState(),
+    onToggle: ((isEnabled: Boolean, title: String) -> Unit)? = null
+) {
     val theme = LocalTheme.current
 
-    val groupedSettings = remember { settings.groupBy { it.group } }
+    val groupedSettings = remember(uiState) { uiState.settings.groupBy { it.group } }
 
-    val notifications = groupedSettings["Notifications"].orEmpty()
-    val themeGroup = groupedSettings["Theme"].orEmpty()
+    val preferenceGroup = groupedSettings["Preferences"].orEmpty()
     val moreGroup = groupedSettings["More"].orEmpty()
     val versionGroup = groupedSettings["-"].orEmpty()
 
-    // Reusable text styles (buat sekali)
     val headerStyle = TextStyle(
         fontSize = 14.sp,
         color = theme.buttonPrimary,
@@ -130,38 +97,24 @@ fun SettingScreen(modifier: Modifier = Modifier) {
         ) {
             item { Spacer(Modifier.height(innerPadding.calculateTopPadding() + 20.dp)) }
 
-            // Notifications group (single toggle item)
-            if (notifications.isNotEmpty()) {
-                item(key = "header_notifications") {
-                    GroupHeader(title = "Notifications", style = headerStyle)
+            if (preferenceGroup.isNotEmpty()) {
+                item(key = "header_preference") {
+                    GroupHeader(title = SettingsGroup.PREFERENCES, style = headerStyle)
                 }
                 items(
-                    items = notifications,
+                    items = preferenceGroup,
                     key = { it.id }
                 ) { setting ->
-                    SettingItem(setting = setting)
+                    SettingItem(setting = setting, onToggleClick = { isEnabled, title ->
+                        onToggle?.invoke(isEnabled, title)
+                    })
                     Spacer(Modifier.height(12.dp))
                 }
             }
 
-            // Theme group (single toggle item)
-            if (themeGroup.isNotEmpty()) {
-                item(key = "header_theme") {
-                    GroupHeader(title = "Theme", style = headerStyle)
-                }
-                items(
-                    items = themeGroup,
-                    key = { it.id }
-                ) { setting ->
-                    SettingItem(setting = setting)
-                }
-                item { Spacer(Modifier.height(32.dp)) }
-            }
-
-            // More group (boxed list)
             if (moreGroup.isNotEmpty()) {
                 item(key = "more_box") {
-                    GroupHeader(title = "More", style = headerStyle)
+                    GroupHeader(title = SettingsGroup.MORE, style = headerStyle)
                     Spacer(Modifier.height(8.dp))
                     Box(
                         Modifier
@@ -169,12 +122,12 @@ fun SettingScreen(modifier: Modifier = Modifier) {
                             .clip(RoundedCornerShape(20.dp))
                             .background(theme.settingItemBackground)
                     ) {
-                        Column(Modifier.padding(16.dp)) {
+                        Column(Modifier.padding(horizontal = 16.dp)) {
                             moreGroup.forEachIndexed { index, setting ->
                                 Row(
                                     Modifier
                                         .fillMaxWidth()
-                                        .clickable(enabled = setting.onClick != null) { setting.onClick?.invoke() }
+//                                        .clickable(enabled = setting.onClick != null) { setting.onClick?.invoke() }
                                         .padding(vertical = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -233,6 +186,23 @@ fun SettingScreen(modifier: Modifier = Modifier) {
     }
 }
 
+private fun createOnToggleHandler(
+    title: String,
+    isEnabled: Boolean,
+    viewModel: SettingsViewModel,
+) {
+    when (title) {
+        SettingsTitle.DARK_MODE -> {
+            val uiMode = if (isEnabled) UiMode.DARK else UiMode.LIGHT
+            viewModel.toggleDarkMode(uiMode)
+        }
+
+        SettingsTitle.PUSH_NOTIFICATIONS -> viewModel.toggleNotifications(isEnabled)
+        SettingsTitle.TIME_FORMAT -> viewModel.toggleTimeFormat(isEnabled)
+        else -> {}
+    }
+}
+
 @Composable
 private fun GroupHeader(title: String, style: TextStyle) {
     Column {
@@ -244,5 +214,13 @@ private fun GroupHeader(title: String, style: TextStyle) {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun SettingScreenPreview() {
-    SettingScreen()
+    SettingScreen(
+        uiState = SettingState(
+            settings = createSettingsList(
+                uiMode = UiMode.DARK,
+                notificationsEnabled = true,
+                timeFormat24H = false
+            )
+        )
+    )
 }

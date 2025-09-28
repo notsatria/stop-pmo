@@ -82,4 +82,10 @@ dependencies {
 
     // Datetime
     implementation(libs.kotlinx.datetime)
+
+    // DataStore
+    implementation(libs.datastore)
+
+    // Logger
+    implementation(libs.logger)
 }

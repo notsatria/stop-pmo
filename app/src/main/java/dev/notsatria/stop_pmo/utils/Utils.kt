@@ -25,3 +25,9 @@ fun getBottomNavHeight(): Dp {
         windowInsets.getBottom(density).toDp()
     }
 }
+
+object UiMode {
+    const val SYSTEM = 0
+    const val LIGHT = 1
+    const val DARK = 2
+}
