@@ -5,23 +5,25 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import dev.notsatria.stop_pmo.data.preference.SettingsDataStore
 import dev.notsatria.stop_pmo.navigation.PMONavHost
 import dev.notsatria.stop_pmo.navigation.Screen
 import dev.notsatria.stop_pmo.ui.components.BottomNavBar
-import dev.notsatria.stop_pmo.ui.screen.dashboard.DashboardRoute
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 import dev.notsatria.stop_pmo.ui.theme.darkThemeColors
 import dev.notsatria.stop_pmo.ui.theme.lightThemeColors
+import dev.notsatria.stop_pmo.utils.UiMode
+import org.koin.compose.koinInject
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,9 +37,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun StopPmoApp(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
 ) {
-    val themeColors = if (isSystemInDarkTheme()) darkThemeColors else lightThemeColors
+    val settingsDataStore: SettingsDataStore = koinInject()
+    val uiMode by settingsDataStore.uiModeFlow.collectAsState(initial = UiMode.DARK)
+    val themeColors = when (uiMode) {
+        UiMode.LIGHT -> lightThemeColors
+        UiMode.DARK -> darkThemeColors
+        else -> if (isSystemInDarkTheme()) darkThemeColors else lightThemeColors
+    }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val bottomBarVisibleRoutes = listOf(

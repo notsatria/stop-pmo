@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -52,53 +53,49 @@ fun BottomNavBar(
             screen = Screen.Settings
         ),
     )
-    NavigationBar(
-        modifier.drawBehind {
-            drawLine(
-                theme.divider,
-                start = Offset(0f, 0f),
-                end = Offset(size.width, 0f),
-                strokeWidth = 3f
-            )
-        },
-        windowInsets = NavigationBarDefaults.windowInsets,
-        containerColor = theme.surface,
-        tonalElevation = NavigationBarDefaults.Elevation + 4.dp,
-    ) {
-        navItems.map { item ->
-            NavigationBarItem(
-                selected = currentRoute == item.screen::class.qualifiedName,
-                onClick = {
-                    navController.navigate(item.screen) {
-                        popUpTo(navController.graph.id) {
-                            saveState = true
+    Column(modifier.fillMaxWidth()) {
+        HorizontalDivider(Modifier.fillMaxWidth(), color = theme.divider)
+        NavigationBar(
+            Modifier,
+            windowInsets = NavigationBarDefaults.windowInsets,
+            containerColor = theme.surface,
+            tonalElevation = NavigationBarDefaults.Elevation + 4.dp,
+        ) {
+            navItems.map { item ->
+                NavigationBarItem(
+                    selected = currentRoute == item.screen::class.qualifiedName,
+                    onClick = {
+                        navController.navigate(item.screen) {
+                            popUpTo(navController.graph.id) {
+                                saveState = true
+                            }
+                            restoreState = true
+                            launchSingleTop = true
                         }
-                        restoreState = true
-                        launchSingleTop = true
-                    }
-                },
-                icon = {
-                    Icon(
-                        painterResource(item.icon),
-                        contentDescription = item.label,
-                        tint = if (currentRoute == item.screen::class.qualifiedName) theme.iconPrimary else theme.iconDisabled
+                    },
+                    icon = {
+                        Icon(
+                            painterResource(item.icon),
+                            contentDescription = item.label,
+                            tint = if (currentRoute == item.screen::class.qualifiedName) theme.iconPrimary else theme.iconDisabled
+                        )
+                    },
+                    label = {
+                        Text(
+                            item.label,
+                            color = if (currentRoute == item.screen::class.qualifiedName) theme.iconPrimary else theme.iconDisabled
+                        )
+                    },
+                    alwaysShowLabel = true,
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = theme.iconPrimary,
+                        unselectedIconColor = theme.iconDisabled,
+                        selectedTextColor = theme.iconPrimary,
+                        unselectedTextColor = theme.iconDisabled,
+                        indicatorColor = theme.iconPrimary.copy(alpha = 0.12f)
                     )
-                },
-                label = {
-                    Text(
-                        item.label,
-                        color = if (currentRoute == item.screen::class.qualifiedName) theme.iconPrimary else theme.iconDisabled
-                    )
-                },
-                alwaysShowLabel = true,
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = theme.iconPrimary,
-                    unselectedIconColor = theme.iconDisabled,
-                    selectedTextColor = theme.iconPrimary,
-                    unselectedTextColor = theme.iconDisabled,
-                    indicatorColor = theme.iconPrimary.copy(alpha = 0.12f)
                 )
-            )
+            }
         }
     }
 }
