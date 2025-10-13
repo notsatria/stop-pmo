@@ -1,10 +1,14 @@
 package dev.notsatria.stop_pmo.ui.screen.settings
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,27 +40,50 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.core.content.ContextCompat
 import dev.notsatria.stop_pmo.BuildConfig
 import dev.notsatria.stop_pmo.R
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 import dev.notsatria.stop_pmo.utils.DebugWorkScheduler
 import dev.notsatria.stop_pmo.utils.UiMode
-import dev.notsatria.stop_pmo.utils.testWorker
 import org.koin.androidx.compose.koinViewModel
-import java.util.UUID
+import kotlin.text.compareTo
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SettingRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = koinViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission Granted
+                viewModel.toggleNotifications(true)
+            } else {
+                viewModel.toggleNotifications(false)
+            }
+        }
 
     SettingScreen(
         modifier,
+        context = context,
         uiState = uiState,
         onToggle = { isEnabled, title ->
-            createOnToggleHandler(title, isEnabled, viewModel)
+            when (title) {
+                SettingsTitle.PUSH_NOTIFICATIONS -> {
+                    handleNotificationPermission(
+                        context = context,
+                        isEnabled = isEnabled,
+                        launcher = launcher,
+                        viewModel = viewModel
+                    )
+                }
+                else -> {
+                    createOnToggleHandler(title, isEnabled, viewModel)
+                }
+            }
         }
     )
 }
@@ -65,11 +92,11 @@ fun SettingRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = k
 @Composable
 fun SettingScreen(
     modifier: Modifier = Modifier,
+    context: Context = LocalContext.current,
     uiState: SettingState = SettingState(),
     onToggle: ((isEnabled: Boolean, title: String) -> Unit)? = null
 ) {
     val theme = LocalTheme.current
-    val context = LocalContext.current
 
     val groupedSettings = remember(uiState) { uiState.settings.groupBy { it.group } }
 
@@ -193,7 +220,7 @@ fun SettingScreen(
             if (BuildConfig.DEBUG) {
                 item {
                     Button(modifier = Modifier.fillMaxWidth(), onClick = {
-                       DebugWorkScheduler.scheduleImmediateStreakCheck(context, 7)
+                        DebugWorkScheduler.scheduleImmediateStreakCheck(context, 7)
                     }) {
                         Text("Test Streak Worker")
                     }
@@ -202,6 +229,36 @@ fun SettingScreen(
 
             item { Spacer(Modifier.height(innerPadding.calculateBottomPadding() + 20.dp)) }
         }
+    }
+}
+
+private fun handleNotificationPermission(
+    context: Context,
+    isEnabled: Boolean,
+    launcher: ActivityResultLauncher<String>,
+    viewModel: SettingsViewModel
+) {
+    if (!isEnabled) {
+        // User wants to disable notifications - no permission check needed
+        viewModel.toggleNotifications(false)
+        return
+    }
+
+    // User wants to enable notifications
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasPermission) {
+            viewModel.toggleNotifications(true)
+        } else {
+            launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    } else {
+        // Pre-Android 13, notifications don't require runtime permission
+        viewModel.toggleNotifications(true)
     }
 }
 
@@ -230,6 +287,7 @@ private fun GroupHeader(title: String, style: TextStyle) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun SettingScreenPreview() {
