@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.testImplementation
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -59,6 +61,12 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    testImplementation(libs.androidx.work.testing)
+    testImplementation(libs.mockk)
+
+    testImplementation(libs.koin.test.junit4)
+    testImplementation(libs.koin.android.test)
 
     // Room
     implementation(libs.room)

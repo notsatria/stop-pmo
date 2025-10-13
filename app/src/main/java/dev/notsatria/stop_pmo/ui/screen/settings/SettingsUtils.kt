@@ -34,7 +34,7 @@ fun createSettingsList(
     Setting(
         group = SettingsGroup.PREFERENCES,
         title = SettingsTitle.PUSH_NOTIFICATIONS,
-        description = "Enable or disable push Streak Notifications",
+        description = "Enable or disable push Streak Notifications on every 7 days",
         isEnabled = notificationsEnabled,
     ),
     Setting(

@@ -1,6 +1,8 @@
 package dev.notsatria.stop_pmo.ui.screen.settings
 
 import android.content.res.Configuration
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -39,11 +41,13 @@ import dev.notsatria.stop_pmo.BuildConfig
 import dev.notsatria.stop_pmo.R
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
+import dev.notsatria.stop_pmo.utils.DebugWorkScheduler
 import dev.notsatria.stop_pmo.utils.UiMode
 import dev.notsatria.stop_pmo.utils.testWorker
 import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SettingRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = koinViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
@@ -57,6 +61,7 @@ fun SettingRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = k
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SettingScreen(
     modifier: Modifier = Modifier,
@@ -189,7 +194,7 @@ fun SettingScreen(
             if (BuildConfig.DEBUG) {
                 item {
                     Button(modifier = Modifier.fillMaxWidth(), onClick = {
-                        testWorker(context, epoch = 1759741200)
+                       DebugWorkScheduler.scheduleImmediateStreakCheck(context, 7)
                     }) {
                         Text("Test Streak Worker")
                     }
