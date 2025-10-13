@@ -20,7 +20,7 @@ fun String.toDayAgo(): String {
     try {
         val duration = Clock.System.now() - Instant.parse(this)
         val day = duration.inWholeDays
-        return when  {
+        return when {
             day < 1L -> {
                 val hours = duration.inWholeHours
                 if (hours < 1L) {
@@ -38,9 +38,11 @@ fun String.toDayAgo(): String {
                     "$hours hours ago"
                 }
             }
+
             day == 1L -> {
                 "$day day ago"
             }
+
             else -> {
                 "$day days ago"
             }
@@ -51,10 +53,11 @@ fun String.toDayAgo(): String {
 }
 
 val defaultDateFormat = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
-val timeFormat = SimpleDateFormat("HH:mm", Locale.ENGLISH)
+val timeFormat24H = SimpleDateFormat("HH:mm", Locale.ENGLISH)
+val timeFormat12H = SimpleDateFormat("hh:mm a", Locale.ENGLISH)
 
 @OptIn(ExperimentalTime::class)
-fun String.formatDate(): String {
+fun String.formatDate(use24Hour: Boolean): String {
     try {
         val instant = Instant.parse(this)
         val date = Date(instant.toEpochMilliseconds())
@@ -63,7 +66,8 @@ fun String.formatDate(): String {
             append(" ")
             append("at")
             append(" ")
-            append(timeFormat.format(date))
+            if (use24Hour) append(timeFormat24H.format(date))
+            else append(timeFormat12H.format(date))
         }
         return result
     } catch (_: Exception) {

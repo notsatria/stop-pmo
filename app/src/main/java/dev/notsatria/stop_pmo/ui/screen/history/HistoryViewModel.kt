@@ -2,6 +2,7 @@ package dev.notsatria.stop_pmo.ui.screen.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.notsatria.stop_pmo.data.preference.SettingsDataStore
 import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,8 @@ data class HistoryUiState(
     val relapseHistory: List<RelapseEvent> = emptyList(),
     val pageState: PageState = PageState(),
     val error: Throwable? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val use24HourFormat: Boolean = false
 )
 
 data class PageState(
@@ -23,7 +25,10 @@ data class PageState(
     val endReached: Boolean = false,
 )
 
-class HistoryViewModel(private val repository: RelapseRepository) : ViewModel() {
+class HistoryViewModel(
+    private val repository: RelapseRepository,
+    private val settingPref: SettingsDataStore
+) : ViewModel() {
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -64,6 +69,15 @@ class HistoryViewModel(private val repository: RelapseRepository) : ViewModel() 
                     offset = it.pageState.offset + it.pageState.pageSize
                 )
             )
+        }
+    }
+
+    fun loadUserSettings() {
+        viewModelScope.launch {
+            val use24HourFormat = settingPref.timeFormat24HFlow.first()
+            _uiState.update {
+                it.copy(use24HourFormat = use24HourFormat)
+            }
         }
     }
 }

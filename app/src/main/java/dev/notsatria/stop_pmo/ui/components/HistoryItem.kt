@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,7 +27,12 @@ import dev.notsatria.stop_pmo.utils.formatDate
 import dev.notsatria.stop_pmo.utils.toDayAgo
 
 @Composable
-fun HistoryItem(modifier: Modifier = Modifier, occurredAt: String, type: String) {
+fun HistoryItem(
+    modifier: Modifier = Modifier,
+    occurredAt: String,
+    type: String,
+    use24HourFormat: Boolean = true
+) {
     val theme = LocalTheme.current
     val subtitle = if (type == HistoryItemType.RECENT) occurredAt.toDayAgo() else occurredAt
     Row(
@@ -57,11 +63,22 @@ fun HistoryItem(modifier: Modifier = Modifier, occurredAt: String, type: String)
             )
             Spacer(Modifier.height(2.dp))
             Text(
-                if (type == HistoryItemType.HISTORY) subtitle.formatDate() else subtitle,
+                if (type == HistoryItemType.HISTORY) subtitle.formatDate(use24HourFormat) else subtitle,
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
                     color = theme.textSecondary
+                )
+            )
+        }
+        if (type == HistoryItemType.HISTORY) {
+            Spacer(Modifier.weight(1f))
+            Text(
+                occurredAt.toDayAgo(),
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = theme.textPrimary
                 )
             )
         }

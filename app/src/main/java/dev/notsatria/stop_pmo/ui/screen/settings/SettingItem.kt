@@ -39,7 +39,6 @@ fun SettingItem(
         modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-//            .clickable(enabled = hasClick) { if (hasClick) setting.onClick.invoke() }
             .background(theme.settingItemBackground)
     ) {
         Row(
@@ -48,7 +47,7 @@ fun SettingItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(Modifier.weight(2f)) {
                 Text(
                     setting.title,
                     style = TextStyle(
@@ -63,7 +62,6 @@ fun SettingItem(
                     style = TextStyle(fontSize = 14.sp, color = theme.textSecondary)
                 )
             }
-            Spacer(Modifier.weight(1f))
             if (hasToggle) {
                 Switch(
                     checked = setting.isEnabled,

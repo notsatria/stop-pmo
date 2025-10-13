@@ -137,7 +137,6 @@ fun SettingScreen(
                                 Row(
                                     Modifier
                                         .fillMaxWidth()
-//                                        .clickable(enabled = setting.onClick != null) { setting.onClick?.invoke() }
                                         .padding(vertical = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {

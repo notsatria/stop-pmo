@@ -118,7 +118,7 @@ fun DashboardScreen(
                             .padding(horizontal = 20.dp)
                             .padding(bottom = 12.dp),
                         occurredAt = uiState.recentRelapses[it].occurredAt,
-                        type = HistoryItemType.RECENT
+                        type = HistoryItemType.RECENT,
                     )
                 }
             }

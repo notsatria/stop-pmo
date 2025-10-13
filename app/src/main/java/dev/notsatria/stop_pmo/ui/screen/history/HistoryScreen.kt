@@ -38,6 +38,10 @@ fun HistoryRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        viewModel.loadUserSettings()
+    }
+
     HistoryScreen(
         modifier = modifier,
         uiState = uiState,
@@ -96,7 +100,8 @@ fun HistoryScreen(
                         .padding(bottom = 20.dp)
                         .padding(horizontal = 20.dp),
                     occurredAt = history.occurredAt,
-                    type = HistoryItemType.HISTORY
+                    type = HistoryItemType.HISTORY,
+                    use24HourFormat = uiState.use24HourFormat
                 )
                 if (index == uiState.relapseHistory.lastIndex) {
                     Box(modifier = Modifier.height(20.dp))
