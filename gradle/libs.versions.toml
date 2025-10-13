@@ -17,6 +17,7 @@ navigationCompose = "2.9.3"
 serialization = "1.9.0"
 koin-bom = "4.1.0"
 datastorePreferences = "1.1.1"
+workRuntimeKtx = "2.10.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -53,11 +54,13 @@ koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-core = { module = "io.insert-koin:koin-core" }
 koin-compose = { module = "io.insert-koin:koin-androidx-compose" }
 koin-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navigation" }
+koin-worker = { module = "io.insert-koin:koin-androidx-workmanager" }
 
 materialKolor = "com.materialkolor:material-kolor:3.0.1"
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 
 [bundles]
-koin = ["koin-core", "koin-compose", "koin-compose-navigation"]
+koin = ["koin-core", "koin-compose", "koin-compose-navigation", "koin-worker"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

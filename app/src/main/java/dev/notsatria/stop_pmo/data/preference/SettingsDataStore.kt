@@ -20,6 +20,7 @@ class SettingsDataStore(private val dataStore: DataStore<Preferences>) {
         val UI_MODE = intPreferencesKey("ui_mode")
         val NOTIFICATION_ENABLED = booleanPreferencesKey("notification_enabled")
         val TIME_FORMAT_24H = booleanPreferencesKey("time_format_24h")
+        val LAST_NOTIFIED_STREAK = intPreferencesKey("last_notified_streak")
     }
 
     suspend fun setUiMode(mode: Int) {
@@ -34,9 +35,15 @@ class SettingsDataStore(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[TIME_FORMAT_24H] = enabled }
     }
 
+    suspend fun setLastNotifiedStreak(streak: Int) {
+        dataStore.edit { it[LAST_NOTIFIED_STREAK] = streak }
+    }
+
     val uiModeFlow = dataStore.data.map { it[UI_MODE] ?: UiMode.SYSTEM }
 
     val notificationEnabledFlow = dataStore.data.map { it[NOTIFICATION_ENABLED] ?: true }
 
     val timeFormat24HFlow = dataStore.data.map { it[TIME_FORMAT_24H] ?: false }
+
+    val lastNotifiedStreakFlow = dataStore.data.map { it[LAST_NOTIFIED_STREAK] ?: 0 }
 }

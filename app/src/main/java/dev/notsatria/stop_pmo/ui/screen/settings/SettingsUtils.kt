@@ -4,7 +4,7 @@ import dev.notsatria.stop_pmo.utils.UiMode
 import java.util.UUID
 
 object SettingsTitle {
-    const val PUSH_NOTIFICATIONS = "Push Notifications"
+    const val PUSH_NOTIFICATIONS = "Streak Notifications"
     const val DARK_MODE = "Dark Mode"
     const val TIME_FORMAT = "Time Format"
     const val PRIVACY_POLICY = "Privacy Policy"
@@ -34,7 +34,7 @@ fun createSettingsList(
     Setting(
         group = SettingsGroup.PREFERENCES,
         title = SettingsTitle.PUSH_NOTIFICATIONS,
-        description = "Enable or disable push notifications",
+        description = "Enable or disable push Streak Notifications",
         isEnabled = notificationsEnabled,
     ),
     Setting(

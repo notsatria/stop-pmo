@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -26,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -33,10 +35,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.notsatria.stop_pmo.BuildConfig
 import dev.notsatria.stop_pmo.R
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 import dev.notsatria.stop_pmo.utils.UiMode
+import dev.notsatria.stop_pmo.utils.testWorker
 import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
 
@@ -60,6 +64,7 @@ fun SettingScreen(
     onToggle: ((isEnabled: Boolean, title: String) -> Unit)? = null
 ) {
     val theme = LocalTheme.current
+    val context = LocalContext.current
 
     val groupedSettings = remember(uiState) { uiState.settings.groupBy { it.group } }
 
@@ -177,6 +182,16 @@ fun SettingScreen(
                                 style = subtitleStyle
                             )
                         }
+                    }
+                }
+            }
+
+            if (BuildConfig.DEBUG) {
+                item {
+                    Button(modifier = Modifier.fillMaxWidth(), onClick = {
+                        testWorker(context, epoch = 1759741200)
+                    }) {
+                        Text("Test Streak Worker")
                     }
                 }
             }
