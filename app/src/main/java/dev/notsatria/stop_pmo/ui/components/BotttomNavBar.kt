@@ -48,6 +48,11 @@ fun BottomNavBar(
             screen = Screen.History
         ),
         NavItem(
+            icon = R.drawable.ic_analytics,
+            label = "Analytics",
+            screen = Screen.Analytics
+        ),
+        NavItem(
             icon = R.drawable.ic_settings,
             label = "Settings",
             screen = Screen.Settings

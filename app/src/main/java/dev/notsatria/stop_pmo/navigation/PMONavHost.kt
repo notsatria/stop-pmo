@@ -1,5 +1,7 @@
 package dev.notsatria.stop_pmo.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -11,6 +13,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import dev.notsatria.stop_pmo.ui.screen.analytics.AnalyticsRoute
+import dev.notsatria.stop_pmo.ui.screen.analytics.AnalyticsScreen
 import dev.notsatria.stop_pmo.ui.screen.dashboard.DashboardRoute
 import dev.notsatria.stop_pmo.ui.screen.history.HistoryRoute
 import dev.notsatria.stop_pmo.ui.screen.settings.SettingRoute
@@ -36,6 +40,7 @@ private fun NavGraphBuilder.graph(navController: NavController) {
     }) {
         DashboardRoute()
     }
+
     composable<Screen.History>(enterTransition = {
         fadeIn(animationSpec = tween(300, easing = LinearEasing))
     }) {
@@ -47,6 +52,13 @@ private fun NavGraphBuilder.graph(navController: NavController) {
             }
         })
     }
+
+    composable<Screen.Analytics>(enterTransition = {
+        fadeIn(animationSpec = tween(300, easing = LinearEasing))
+    }) {
+        AnalyticsRoute()
+    }
+
     composable<Screen.Settings>(enterTransition = {
         fadeIn(animationSpec = tween(300, easing = LinearEasing))
     }) {

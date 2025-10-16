@@ -97,4 +97,7 @@ dependencies {
 
     // Logger
     implementation(libs.logger)
+
+    // Charts
+    implementation(libs.compose.charts)
 }

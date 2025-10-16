@@ -88,6 +88,7 @@ private fun StopPmoApp(
     val bottomBarVisibleRoutes = listOf(
         Screen.Dashboard::class.qualifiedName,
         Screen.History::class.qualifiedName,
+        Screen.Analytics::class.qualifiedName,
         Screen.Settings::class.qualifiedName
     )
     CompositionLocalProvider(LocalTheme provides themeColors) {

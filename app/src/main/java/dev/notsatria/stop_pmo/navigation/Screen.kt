@@ -7,7 +7,7 @@ sealed class Screen {
     @Serializable
     object Dashboard : Screen()
     @Serializable
-    object Statistics : Screen()
+    object Analytics : Screen()
     @Serializable
     object Settings : Screen()
     @Serializable

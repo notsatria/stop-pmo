@@ -15,6 +15,7 @@ data class CustomTheme(
     val settingItemBackground: Color,
     val streakBackground: Color = Color(0xFFFFEDD5),
     val streakForeground: Color = Color(0xFFF9771C),
+    val cardContainer: Color,
     val divider: Color,
     val isLight: Boolean
 )
@@ -30,6 +31,7 @@ val lightThemeColors = CustomTheme(
     buttonDisabled = Color(0xFF707785),
     settingItemBackground = Color.White,
     divider = Color(0xFFF8F8F9),
+    cardContainer = Color.White,
     isLight = true
 )
 
@@ -45,6 +47,7 @@ val darkThemeColors = CustomTheme(
     buttonDisabled = Color(0xFF6B7280),
     settingItemBackground = Color(0xFF1C272D),
     divider = Color(0xFF253035),
+    cardContainer = Color(0xFF0e191e),
     isLight = false
 )
 

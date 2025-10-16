@@ -6,6 +6,7 @@ import dev.notsatria.stop_pmo.data.preference.SettingsDataStore
 import dev.notsatria.stop_pmo.data.preference.settingsDataStore
 import dev.notsatria.stop_pmo.data.repository.RelapseRepositoryImpl
 import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
+import dev.notsatria.stop_pmo.ui.screen.analytics.AnalyticsViewModel
 import dev.notsatria.stop_pmo.ui.screen.dashboard.DashboardViewModel
 import dev.notsatria.stop_pmo.ui.screen.history.HistoryViewModel
 import dev.notsatria.stop_pmo.ui.screen.settings.SettingsViewModel
@@ -32,6 +33,7 @@ val appModule = module {
     viewModelOf(::DashboardViewModel)
     viewModelOf(::HistoryViewModel)
     viewModelOf(::SettingsViewModel)
+    viewModelOf(::AnalyticsViewModel)
 
     // Preference
     single<SettingsDataStore> {
