@@ -11,7 +11,8 @@ object DummyData {
                 RelapseEvent(
                     id = it,
                     occurredAt = "2023-09-${if (it < 10) "0$it" else it}T12:00:00Z",
-                    note = if (it % 2 == 0) "Relapsed on day $it" else null
+                    note = if (it % 2 == 0) "Relapsed on day $it" else null,
+                    streak = it * 3
                 )
             )
         )
@@ -22,7 +23,8 @@ object DummyData {
             RelapseEvent(
                 id = index + 1,
                 occurredAt = "2023-09-${if (index + 1 < 10) "0${index + 1}" else index + 1}T12:00:00Z",
-                note = if (index % 2 == 0) "Relapsed on day ${index + 1}" else null
+                note = if (index % 2 == 0) "Relapsed on day ${index + 1}" else null,
+                streak = 10 - index
             )
         }
     }

@@ -28,4 +28,7 @@ interface RelapseDao {
 
     @Query("SELECT * FROM relapse_events ORDER BY occurredAt DESC LIMIT :count OFFSET :offset")
     fun getRelapseHistory(count: Int, offset: Int): Flow<List<RelapseEventEntity>>
+
+    @Query("UPDATE relapse_events SET streak = :streak WHERE id = (SELECT id FROM relapse_events ORDER BY occurredAt DESC LIMIT 1 OFFSET 1)")
+    suspend fun updatePreviousStreak(streak: Int)
 }

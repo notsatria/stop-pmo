@@ -6,5 +6,6 @@ import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 fun RelapseEventEntity.toDomainModel() = RelapseEvent(
     id = this.id,
     occurredAt = this.occurredAt,
+    streak = this.streak,
     note = this.note
 )

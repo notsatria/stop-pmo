@@ -6,7 +6,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 interface RelapseRepository {
-    suspend fun logRelapse(occurredAt: String, note: String?)
+    suspend fun logRelapse(occurredAt: String, streak: Int, note: String?)
     suspend fun lastRelapse(): RelapseEvent?
     fun allRelapseFlow(): Flow<List<RelapseEvent>>
     suspend fun clearAll()

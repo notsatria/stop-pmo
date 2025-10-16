@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
 import dev.notsatria.stop_pmo.utils.getCurrentStreak
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.KoinApplication.Companion.init
 import timber.log.Timber.Forest.d
 import kotlin.time.Clock
@@ -35,7 +37,9 @@ class DashboardViewModel(val repository: RelapseRepository) : ViewModel() {
         viewModelScope.launch {
             val now = Clock.System.now()
             d("Logging relapse at $now")
-            repository.logRelapse(now.toString(), null)
+            withContext(Dispatchers.IO) {
+                repository.logRelapse(now.toString(), streak = uiState.value.currentStreak, null)
+            }
         }
     }
 

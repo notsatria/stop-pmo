@@ -10,26 +10,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.notsatria.stop_pmo.R
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 import dev.notsatria.stop_pmo.utils.formatDate
 import dev.notsatria.stop_pmo.utils.toDayAgo
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 @Composable
 fun HistoryItem(
     modifier: Modifier = Modifier,
     occurredAt: String,
+    streak: Int = 0,
     type: String,
     use24HourFormat: Boolean = true
 ) {
@@ -73,8 +77,10 @@ fun HistoryItem(
         }
         if (type == HistoryItemType.HISTORY) {
             Spacer(Modifier.weight(1f))
+            Icon(painterResource(R.drawable.ic_fire_filled), null, tint = theme.streakForeground)
+            Spacer(Modifier.width(4.dp))
             Text(
-                occurredAt.toDayAgo(),
+                "$streak Days",
                 style = TextStyle(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
@@ -88,4 +94,19 @@ fun HistoryItem(
 object HistoryItemType {
     const val RECENT = "recent"
     const val HISTORY = "history"
+}
+
+@OptIn(ExperimentalTime::class)
+@Preview
+@Composable
+private fun Preview() {
+    MaterialTheme {
+        HistoryItem(
+            modifier = Modifier,
+            occurredAt = Clock.System.now().toString(),
+            streak = 3,
+            type = HistoryItemType.HISTORY,
+            use24HourFormat = true
+        )
+    }
 }

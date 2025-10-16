@@ -41,7 +41,7 @@ class SettingsDataStore(private val dataStore: DataStore<Preferences>) {
 
     val uiModeFlow = dataStore.data.map { it[UI_MODE] ?: UiMode.SYSTEM }
 
-    val notificationEnabledFlow = dataStore.data.map { it[NOTIFICATION_ENABLED] ?: false }
+    val notificationEnabledFlow = dataStore.data.map { it[NOTIFICATION_ENABLED] ?: true }
 
     val timeFormat24HFlow = dataStore.data.map { it[TIME_FORMAT_24H] ?: true }
 

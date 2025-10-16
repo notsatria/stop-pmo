@@ -1,5 +1,6 @@
 package dev.notsatria.stop_pmo.ui.screen.history
 
+import android.R.attr.type
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -79,7 +80,7 @@ fun HistoryScreen(
     Scaffold(
         modifier.fillMaxSize(),
         topBar = {
-            CenterTopBar(title = "Relapase History")
+            CenterTopBar(title = "Relapse History")
         },
         containerColor = theme.surface
     ) { innerPadding ->
@@ -100,6 +101,7 @@ fun HistoryScreen(
                         .padding(bottom = 20.dp)
                         .padding(horizontal = 20.dp),
                     occurredAt = history.occurredAt,
+                    streak = history.streak,
                     type = HistoryItemType.HISTORY,
                     use24HourFormat = uiState.use24HourFormat
                 )

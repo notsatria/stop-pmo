@@ -11,10 +11,12 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 class RelapseRepositoryImpl(private val dao: RelapseDao) : RelapseRepository {
-    override suspend fun logRelapse(occurredAt: String, note: String?) {
-        RelapseEventEntity(occurredAt = occurredAt, note = note).let {
-            dao.insert(it)
-        }
+    override suspend fun logRelapse(occurredAt: String, streak: Int, note: String?) {
+        // insert new relapse and update the previous one streak
+        dao.insert(
+            RelapseEventEntity(occurredAt = occurredAt, streak = 0, note = note)
+        )
+        dao.updatePreviousStreak(streak)
     }
 
     override suspend fun lastRelapse(): RelapseEvent? {
