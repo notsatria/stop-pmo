@@ -10,7 +10,6 @@ data class AnalyticsState(
 )
 
 data class ChartDataPoint(
-    val x: Float,
     val y: Float,
     val date: String
 )
@@ -18,5 +17,4 @@ data class ChartDataPoint(
 data class StreakData(
     val relapseDate: String,
     val streakDays: Int,
-    val index: Int
 )

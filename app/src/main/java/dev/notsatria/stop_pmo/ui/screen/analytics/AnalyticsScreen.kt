@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,10 +32,14 @@ import androidx.compose.ui.unit.dp
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
 import dev.notsatria.stop_pmo.ui.theme.CustomTheme
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
+import dev.notsatria.stop_pmo.utils.DummyData
+import dev.notsatria.stop_pmo.utils.formatDateOnly
 import ir.ehsannarmani.compose_charts.LineChart
 import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.DotProperties
 import ir.ehsannarmani.compose_charts.models.DrawStyle
+import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import org.koin.androidx.compose.koinViewModel
@@ -131,8 +136,8 @@ private fun EmptyStateMessage() {
 
 @Composable
 private fun RelapseChart(
+    modifier: Modifier = Modifier,
     chartData: List<ChartDataPoint>,
-    modifier: Modifier = Modifier
 ) {
     val theme = LocalTheme.current
     Card(
@@ -147,7 +152,8 @@ private fun RelapseChart(
         ) {
             if (chartData.isNotEmpty()) {
                 LineChart(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize(),
                     data = listOf(
                         Line(
                             label = "Relapse Events",
@@ -170,6 +176,14 @@ private fun RelapseChart(
                                 strokeColor = SolidColor(theme.buttonPrimary)
                             )
                         ),
+                    ),
+                    indicatorProperties = HorizontalIndicatorProperties(
+                        enabled = true,
+                        textStyle = MaterialTheme.typography.bodySmall.copy(color = theme.textPrimary)
+                    ),
+                    labelHelperProperties = LabelHelperProperties(
+                        enabled = true,
+                        textStyle = MaterialTheme.typography.bodySmall.copy(color = theme.textPrimary),
                     ),
                     labelProperties = LabelProperties(
                         enabled = true,
@@ -201,14 +215,15 @@ private fun StreakSummaryCard(streakData: List<StreakData>) {
             Text(
                 text = "Streak Summary",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = theme.textPrimary
             )
 
             if (streakData.isEmpty()) {
                 Text(
                     text = "No streak data available.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = theme.textPrimary
                 )
             } else {
                 val averageStreak = streakData.drop(1).map { it.streakDays }.average()
@@ -223,12 +238,13 @@ private fun StreakSummaryCard(streakData: List<StreakData>) {
                         Text(
                             text = "Total Relapses",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = theme.textSecondary
                         )
                         Text(
                             text = totalRelapses.toString(),
                             style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = theme.textPrimary
                         )
                     }
 
@@ -236,7 +252,7 @@ private fun StreakSummaryCard(streakData: List<StreakData>) {
                         Text(
                             text = "Longest Streak",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = theme.textSecondary
                         )
                         Text(
                             text = "$longestStreak days",
@@ -251,12 +267,13 @@ private fun StreakSummaryCard(streakData: List<StreakData>) {
                             Text(
                                 text = "Average Streak",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = theme.textSecondary
                             )
                             Text(
                                 text = "${averageStreak.toInt()} days",
                                 style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = theme.textPrimary
                             )
                         }
                     }
@@ -269,7 +286,26 @@ private fun StreakSummaryCard(streakData: List<StreakData>) {
 @Preview
 @Composable
 private fun AnalyticsScreenPreview() {
+    val streakData: List<StreakData> = remember {
+        DummyData.generateRecentRelapses().map {
+            StreakData(it.occurredAt.formatDateOnly(), it.streak)
+        }
+    }
+    val chartData = remember {
+        streakData.map {
+            ChartDataPoint(
+                y = it.streakDays.toFloat(),
+                date = it.relapseDate
+            )
+        }
+    }
     MaterialTheme {
-        AnalyticsScreen()
+        AnalyticsScreen(
+            uiState = AnalyticsState(
+                isLoading = false,
+                chartData = chartData,
+                streakData = streakData
+            )
+        )
     }
 }

@@ -4,19 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
-import dev.notsatria.stop_pmo.utils.formatDate
 import dev.notsatria.stop_pmo.utils.formatDateOnly
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlin.collections.sortedBy
-import kotlin.math.abs
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 class AnalyticsViewModel(
     private val repository: RelapseRepository
@@ -53,13 +45,12 @@ class AnalyticsViewModel(
         val sortedEvents = events.sortedBy { it.occurredAt }
         val streakList = mutableListOf<StreakData>()
 
-        sortedEvents.forEachIndexed { index, event ->
+        sortedEvents.forEach { event ->
             try {
                 streakList.add(
                     StreakData(
                         relapseDate = event.occurredAt,
                         streakDays = event.streak,
-                        index = index + 1
                     )
                 )
             } catch (_: Exception) {
@@ -73,20 +64,9 @@ class AnalyticsViewModel(
     private fun processChartData(streakData: List<StreakData>): List<ChartDataPoint> {
         return streakData.map { streak ->
             ChartDataPoint(
-                x = streak.index.toFloat(),
                 y = streak.streakDays.toFloat(),
                 date = streak.relapseDate.formatDateOnly()
             )
         }
-    }
-
-    @OptIn(ExperimentalTime::class)
-    private fun parseDate(dateString: String): LocalDate {
-        val instant = Instant.parse(dateString)
-        return instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-    }
-
-    private fun calculateDaysBetween(startDate: LocalDate, endDate: LocalDate): Int {
-        return abs((endDate.toEpochDays() - startDate.toEpochDays()).toInt())
     }
 }
