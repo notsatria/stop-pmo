@@ -52,7 +52,11 @@ import kotlin.text.compareTo
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SettingRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = koinViewModel()) {
+fun SettingRoute(
+    modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = koinViewModel(),
+    navigateToStreakScreen: () -> Unit = {}
+) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
@@ -80,11 +84,13 @@ fun SettingRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = k
                         viewModel = viewModel
                     )
                 }
+
                 else -> {
                     createOnToggleHandler(title, isEnabled, viewModel)
                 }
             }
-        }
+        },
+        navigateToStreakScreen = navigateToStreakScreen
     )
 }
 
@@ -94,7 +100,8 @@ fun SettingScreen(
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
     uiState: SettingState = SettingState(),
-    onToggle: ((isEnabled: Boolean, title: String) -> Unit)? = null
+    onToggle: ((isEnabled: Boolean, title: String) -> Unit)? = null,
+    navigateToStreakScreen: () -> Unit = {}
 ) {
     val theme = LocalTheme.current
 
@@ -218,11 +225,20 @@ fun SettingScreen(
             }
 
             if (BuildConfig.DEBUG) {
+                item { Spacer(Modifier.height(20.dp)) }
                 item {
                     Button(modifier = Modifier.fillMaxWidth(), onClick = {
                         DebugWorkScheduler.scheduleImmediateStreakCheck(context, 7)
                     }) {
                         Text("Test Streak Worker")
+                    }
+                }
+                item { Spacer(Modifier.height(20.dp)) }
+                item {
+                    Button(modifier = Modifier.fillMaxWidth(), onClick = {
+                        navigateToStreakScreen()
+                    }) {
+                        Text("Test Streak Screen")
                     }
                 }
             }

@@ -12,4 +12,6 @@ sealed class Screen {
     object Settings : Screen()
     @Serializable
     object History : Screen()
+    @Serializable
+    data class Streak(val streakCount: Int) : Screen()
 }

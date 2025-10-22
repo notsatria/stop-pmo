@@ -9,7 +9,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
+import android.service.autofill.Validators.or
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity
@@ -23,6 +25,7 @@ import dev.notsatria.stop_pmo.utils.StreakNotification.CHANNEL_ID
 import dev.notsatria.stop_pmo.utils.StreakNotification.NOTIFICATION_ID
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalTime::class)
 fun getCurrentStreak(
@@ -72,23 +75,9 @@ fun showStreakNotification(
     streak: Int,
 ) {
     createNotificationChannel(context)
-
-    val intent = Intent(context, MainActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-    }
-
-    val pendingFlags = (PendingIntent.FLAG_UPDATE_CURRENT
-            or PendingIntent.FLAG_IMMUTABLE)
-
-    val pendingIntent: PendingIntent = PendingIntent.getActivity(
-        context,
-        0,
-        intent,
-        pendingFlags
-    )
-
     val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
+    val pendingIntent = createStreakPendingIntent(context, streak)
     val builder =
         NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_fire_filled)
@@ -97,8 +86,8 @@ fun showStreakNotification(
                 NotificationCompat.BigTextStyle()
                     .bigText("Amazing — you reached $streak days! Keep the momentum.")
             )
-            .setContentIntent(pendingIntent)
             .setSound(soundUri)
+            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
 
     with(NotificationManagerCompat.from(context)) {
@@ -113,6 +102,25 @@ fun showStreakNotification(
 
         notify(NOTIFICATION_ID, builder.build())
     }
+}
+
+fun createStreakPendingIntent(context: Context, streakCount: Int): PendingIntent {
+    val intent = Intent(context, MainActivity::class.java).apply {
+        putExtra("nav_target", "streak")
+        putExtra("streak_count", streakCount)
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    }
+
+    val pendingFlags = (PendingIntent.FLAG_UPDATE_CURRENT
+            or PendingIntent.FLAG_IMMUTABLE)
+
+    val pendingIntent: PendingIntent = PendingIntent.getActivity(
+        context,
+        0,
+        intent,
+        pendingFlags
+    )
+    return pendingIntent
 }
 
 object StreakNotification {

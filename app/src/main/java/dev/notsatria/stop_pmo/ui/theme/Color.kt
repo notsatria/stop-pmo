@@ -16,6 +16,10 @@ data class CustomTheme(
     val streakBackground: Color = Color(0xFFFFEDD5),
     val streakForeground: Color = Color(0xFFF9771C),
     val cardContainer: Color,
+    val streakScreenSurface: Color = Color(0xFF221910),
+    val streakButtonBackground: Color = Color(0xFFF48C25),
+    val streakDot: Color = Color(0xFFA38312),
+    val streakTextSecondary: Color = Color(0xFFD3D1CF),
     val divider: Color,
     val isLight: Boolean
 )

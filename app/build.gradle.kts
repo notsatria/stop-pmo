@@ -100,4 +100,7 @@ dependencies {
 
     // Charts
     implementation(libs.compose.charts)
+
+    // Lottie
+    implementation(libs.lottie.compose)
 }

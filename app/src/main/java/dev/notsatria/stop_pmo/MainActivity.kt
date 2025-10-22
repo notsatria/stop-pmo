@@ -1,5 +1,6 @@
 package dev.notsatria.stop_pmo
 
+import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -50,20 +51,21 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            StopPmoApp()
+            StopPmoApp(intent = intent)
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-       unregisterReceiver(broadcast)
+        unregisterReceiver(broadcast)
     }
 }
 
 @Composable
 private fun StopPmoApp(
     navController: NavHostController = rememberNavController(),
-    context: android.content.Context = LocalContext.current
+    context: android.content.Context = LocalContext.current,
+    intent: Intent
 ) {
     val settingsDataStore: SettingsDataStore = koinInject()
     val uiMode by settingsDataStore.uiModeFlow.collectAsState(initial = UiMode.DARK)
@@ -76,6 +78,19 @@ private fun StopPmoApp(
         scheduleDailyStreakCheck(context)
     } else {
         WorkScheduler.cancelStreakCheckWork(context)
+    }
+
+    LaunchedEffect(Unit) {
+        intent.getStringExtra("nav_target").let { target ->
+            val streakCount = intent.getIntExtra("streak_count", 0)
+            if (target == "streak") {
+                navController.navigate(Screen.Streak(streakCount)) {
+                    popUpTo(Screen.Dashboard) {
+                        inclusive = false
+                    }
+                }
+            }
+        }
     }
 
     val themeColors = when (uiMode) {

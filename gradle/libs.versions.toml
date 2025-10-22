@@ -21,6 +21,7 @@ koin-bom = "4.1.0"
 datastorePreferences = "1.1.1"
 workRuntimeKtx = "2.10.5"
 workTesting = "2.10.5"
+lottieCompose = "6.6.10"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -54,6 +55,8 @@ timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 
 datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 
 # Koin
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
