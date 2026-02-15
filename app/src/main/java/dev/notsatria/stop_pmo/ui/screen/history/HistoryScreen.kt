@@ -126,7 +126,7 @@ fun HistoryScreen(
 @Composable
 fun HistoryScreenPreview(modifier: Modifier = Modifier) {
     MaterialTheme {
-        HistoryScreen(uiState = HistoryUiState(DummyData.generateRecentRelapses()))
+        HistoryScreen(uiState = HistoryUiState(DummyData.generateRelapseHistoryItems()))
     }
 }
 

@@ -2,6 +2,7 @@ package dev.notsatria.stop_pmo.utils
 
 import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.ui.components.CalendarInput
+import dev.notsatria.stop_pmo.ui.screen.history.RelapseHistoryItem
 
 object DummyData {
     fun generateCalendarInputList(): List<CalendarInput> = (1..31).map {
@@ -21,6 +22,17 @@ object DummyData {
     fun generateRecentRelapses(): List<RelapseEvent> {
         return List(10) { index ->
             RelapseEvent(
+                id = index + 1,
+                occurredAt = "2023-09-${if (index + 1 < 10) "0${index + 1}" else index + 1}T12:00:00Z",
+                note = if (index % 2 == 0) "Relapsed on day ${index + 1}" else null,
+                streak = 10 - index
+            )
+        }
+    }
+
+    fun generateRelapseHistoryItems(): List<RelapseHistoryItem> {
+        return List(10) { index ->
+            RelapseHistoryItem(
                 id = index + 1,
                 occurredAt = "2023-09-${if (index + 1 < 10) "0${index + 1}" else index + 1}T12:00:00Z",
                 note = if (index % 2 == 0) "Relapsed on day ${index + 1}" else null,

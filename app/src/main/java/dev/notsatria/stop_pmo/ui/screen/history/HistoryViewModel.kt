@@ -5,19 +5,14 @@ import androidx.lifecycle.viewModelScope
 import dev.notsatria.stop_pmo.data.preference.SettingsDataStore
 import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
+import dev.notsatria.stop_pmo.utils.getCurrentStreak
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-data class HistoryUiState(
-    val relapseHistory: List<RelapseEvent> = emptyList(),
-    val pageState: PageState = PageState(),
-    val error: Throwable? = null,
-    val isLoading: Boolean = false,
-    val use24HourFormat: Boolean = false
-)
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 data class PageState(
     val pageSize: Int = 15,
@@ -36,6 +31,7 @@ class HistoryViewModel(
         observeRelapseHistory()
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun observeRelapseHistory() {
         viewModelScope.launch {
             repository.getRelapseHistory(
@@ -47,14 +43,40 @@ class HistoryViewModel(
                     val itemsToShow = allRelapses.take(pageState.offset + pageState.pageSize)
                     val endReached = itemsToShow.size == allRelapses.size
 
+                    val mappedItems = itemsToShow.mapIndexed { index, relapse ->
+                        val displayStreak = if (index == 0 && relapse.streak == 0) {
+                            calculateCurrentStreak(relapse.occurredAt)
+                        } else {
+                            relapse.streak
+                        }
+                        
+                        RelapseHistoryItem(
+                            id = relapse.id,
+                            occurredAt = relapse.occurredAt,
+                            streak = displayStreak,
+                            note = relapse.note
+                        )
+                    }
+
                     currentState.copy(
-                        relapseHistory = itemsToShow,
+                        relapseHistory = mappedItems,
                         pageState = pageState.copy(endReached = endReached),
                         isLoading = false,
                         error = null
                     )
                 }
             }
+        }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun calculateCurrentStreak(occurredAt: String): Int {
+        return try {
+            val relapseTime = kotlin.time.Instant.parse(occurredAt)
+            val now = Clock.System.now()
+            getCurrentStreak(relapseTime, now)
+        } catch (e: Exception) {
+            0
         }
     }
 
