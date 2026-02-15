@@ -1,7 +1,6 @@
 package dev.notsatria.stop_pmo.ui.screen.dashboard
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +20,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +39,7 @@ import dev.notsatria.stop_pmo.ui.components.CenterTopBar
 import dev.notsatria.stop_pmo.ui.components.EmptyStateView
 import dev.notsatria.stop_pmo.ui.components.HistoryItem
 import dev.notsatria.stop_pmo.ui.components.HistoryItemType
+import dev.notsatria.stop_pmo.ui.screen.dashboard.components.RelapseConfirmationDialog
 import dev.notsatria.stop_pmo.ui.theme.CustomTheme
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 import dev.notsatria.stop_pmo.utils.DummyData
@@ -47,15 +48,25 @@ import dev.notsatria.stop_pmo.utils.toHHmmss
 import org.koin.androidx.compose.koinViewModel
 import kotlin.time.Duration
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardRoute(modifier: Modifier = Modifier, viewModel: DashboardViewModel = koinViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     DashboardScreen(
         modifier = modifier,
         onRelapseClick = {
-            viewModel.relapse()
+            viewModel.showConfirmationDialog()
         },
-        uiState = uiState
+        uiState = uiState,
+        showConfirmationDialog = viewModel.showConfirmationDialog,
+        currentDialogStep = viewModel.currentDialogStep,
+        relapseReason = viewModel.relapseReason,
+        onDismissDialog = { viewModel.dismissDialog() },
+        onConfirmRelapse = { viewModel.moveToReasonStep() },
+        onReasonChange = { viewModel.updateRelapseReason(it) },
+        onBackToConfirmation = { viewModel.moveBackToConfirmation() },
+        onSubmitRelapse = { viewModel.submitRelapse() }
     )
 }
 
@@ -65,7 +76,15 @@ fun DashboardScreen(
     modifier: Modifier = Modifier,
     onRelapseClick: () -> Unit = {},
     uiState: DashboardState = DashboardState(),
-    theme: CustomTheme = LocalTheme.current
+    showConfirmationDialog: Boolean = false,
+    currentDialogStep: RelapseDialogStep = RelapseDialogStep.CONFIRMATION,
+    relapseReason: String = "",
+    onDismissDialog: () -> Unit = {},
+    onConfirmRelapse: () -> Unit = {},
+    onReasonChange: (String) -> Unit = {},
+    onBackToConfirmation: () -> Unit = {},
+    onSubmitRelapse: () -> Unit = {},
+    theme: CustomTheme = LocalTheme.current,
 ) {
     Scaffold(modifier, topBar = {
         CenterTopBar(
@@ -123,6 +142,19 @@ fun DashboardScreen(
                 }
             }
             Spacer(Modifier.height(getBottomNavHeight() + 60.dp))
+        }
+
+        if (showConfirmationDialog) {
+            RelapseConfirmationDialog(
+                currentStep = currentDialogStep,
+                relapseReason = relapseReason,
+                onDismiss = onDismissDialog,
+                onConfirmRelapse = onConfirmRelapse,
+                onStillGoing = onDismissDialog,
+                onBackToConfirmation = onBackToConfirmation,
+                onReasonChange = onReasonChange,
+                onSubmitRelapse = onSubmitRelapse
+            )
         }
     }
 }

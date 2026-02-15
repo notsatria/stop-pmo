@@ -1,5 +1,8 @@
 package dev.notsatria.stop_pmo.ui.screen.dashboard
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.notsatria.stop_pmo.domain.model.RelapseEvent
@@ -28,18 +31,61 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+enum class RelapseDialogStep {
+    CONFIRMATION,
+    REASON_INPUT
+}
+
 @OptIn(ExperimentalTime::class)
 class DashboardViewModel(val repository: RelapseRepository) : ViewModel() {
     private var _uiState = MutableStateFlow(DashboardState())
     val uiState: StateFlow<DashboardState> = _uiState.asStateFlow()
 
-    fun relapse() {
+    var showConfirmationDialog: Boolean by mutableStateOf(false)
+        private set
+
+    var currentDialogStep: RelapseDialogStep by mutableStateOf(RelapseDialogStep.CONFIRMATION)
+        private set
+
+    var relapseReason: String by mutableStateOf("")
+        private set
+
+    fun showConfirmationDialog() {
+        showConfirmationDialog = true
+        currentDialogStep = RelapseDialogStep.CONFIRMATION
+        relapseReason = ""
+    }
+
+    fun dismissDialog() {
+        showConfirmationDialog = false
+        currentDialogStep = RelapseDialogStep.CONFIRMATION
+        relapseReason = ""
+    }
+
+    fun moveToReasonStep() {
+        currentDialogStep = RelapseDialogStep.REASON_INPUT
+    }
+
+    fun moveBackToConfirmation() {
+        currentDialogStep = RelapseDialogStep.CONFIRMATION
+    }
+
+    fun updateRelapseReason(reason: String) {
+        relapseReason = reason
+    }
+
+    fun submitRelapse() {
         viewModelScope.launch {
             val now = Clock.System.now()
-            d("Logging relapse at $now")
+            d("Logging relapse at $now with reason: $relapseReason")
             withContext(Dispatchers.IO) {
-                repository.logRelapse(now.toString(), streak = uiState.value.currentStreak, null)
+                repository.logRelapse(
+                    now.toString(), 
+                    streak = uiState.value.currentStreak, 
+                    note = relapseReason.ifBlank { null }
+                )
             }
+            dismissDialog()
         }
     }
 
