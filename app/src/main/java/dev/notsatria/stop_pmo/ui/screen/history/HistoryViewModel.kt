@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dev.notsatria.stop_pmo.data.preference.SettingsDataStore
 import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
+import dev.notsatria.stop_pmo.utils.calculateCurrentStreak
 import dev.notsatria.stop_pmo.utils.getCurrentStreak
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 data class PageState(
     val pageSize: Int = 15,
@@ -66,17 +68,6 @@ class HistoryViewModel(
                     )
                 }
             }
-        }
-    }
-
-    @OptIn(ExperimentalTime::class)
-    private fun calculateCurrentStreak(occurredAt: String): Int {
-        return try {
-            val relapseTime = kotlin.time.Instant.parse(occurredAt)
-            val now = Clock.System.now()
-            getCurrentStreak(relapseTime, now)
-        } catch (e: Exception) {
-            0
         }
     }
 

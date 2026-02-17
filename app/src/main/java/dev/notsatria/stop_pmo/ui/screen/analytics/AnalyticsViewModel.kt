@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
+import dev.notsatria.stop_pmo.utils.calculateCurrentStreak
 import dev.notsatria.stop_pmo.utils.formatDateOnly
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,14 +46,20 @@ class AnalyticsViewModel(
         val sortedEvents = events.sortedBy { it.occurredAt }
         val streakList = mutableListOf<StreakData>()
 
-        sortedEvents.forEach { event ->
+        sortedEvents.forEachIndexed { index, event ->
             try {
-                streakList.add(
+                val streakData = if (index == 0 && event.streak == 0) {
+                    StreakData(
+                        relapseDate = event.occurredAt,
+                        streakDays = calculateCurrentStreak(event.occurredAt)
+                    )
+                } else {
                     StreakData(
                         relapseDate = event.occurredAt,
                         streakDays = event.streak,
                     )
-                )
+                }
+                streakList.add(streakData)
             } catch (_: Exception) {
                 // Skip invalid dates
             }

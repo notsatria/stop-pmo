@@ -86,3 +86,14 @@ fun String.formatDateOnly(): String {
         return this
     }
 }
+
+@OptIn(ExperimentalTime::class)
+fun calculateCurrentStreak(occurredAt: String): Int {
+    return try {
+        val relapseTime = Instant.parse(occurredAt)
+        val now = Clock.System.now()
+        getCurrentStreak(relapseTime, now)
+    } catch (e: Exception) {
+        0
+    }
+}
