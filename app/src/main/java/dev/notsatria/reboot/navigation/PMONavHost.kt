@@ -20,15 +20,20 @@ import androidx.navigation.navDeepLink
 import dev.notsatria.stop_pmo.ui.screen.analytics.AnalyticsRoute
 import dev.notsatria.stop_pmo.ui.screen.dashboard.DashboardRoute
 import dev.notsatria.stop_pmo.ui.screen.history.HistoryRoute
+import dev.notsatria.stop_pmo.ui.screen.onboarding.OnboardingRoute
 import dev.notsatria.stop_pmo.ui.screen.settings.SettingRoute
 import dev.notsatria.stop_pmo.ui.screen.streak.StreakRoute
 
 @Composable
-fun PMONavHost(modifier: Modifier = Modifier, navController: NavHostController) {
+fun PMONavHost(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    startDestination: Screen = Screen.Dashboard
+) {
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = Screen.Dashboard,
+        startDestination = startDestination,
         enterTransition = { fadeIn(animationSpec = tween(300)) },
         exitTransition = { fadeOut(animationSpec = tween(300)) },
         popEnterTransition = { fadeIn(animationSpec = tween(300)) },
@@ -39,6 +44,16 @@ fun PMONavHost(modifier: Modifier = Modifier, navController: NavHostController) 
 }
 
 private fun NavGraphBuilder.graph(navController: NavController) {
+    composable<Screen.Onboarding> {
+        OnboardingRoute(
+            onComplete = {
+                navController.navigate(Screen.Dashboard) {
+                    popUpTo(Screen.Onboarding) { inclusive = true }
+                }
+            }
+        )
+    }
+
     composable<Screen.Dashboard>(enterTransition = {
         fadeIn(animationSpec = tween(300, easing = LinearEasing))
     }) {

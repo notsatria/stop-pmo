@@ -21,6 +21,7 @@ class SettingsDataStore(private val dataStore: DataStore<Preferences>) {
         val NOTIFICATION_ENABLED = booleanPreferencesKey("notification_enabled")
         val TIME_FORMAT_24H = booleanPreferencesKey("time_format_24h")
         val LAST_NOTIFIED_STREAK = intPreferencesKey("last_notified_streak")
+        val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
     }
 
     suspend fun setUiMode(mode: Int) {
@@ -46,4 +47,10 @@ class SettingsDataStore(private val dataStore: DataStore<Preferences>) {
     val timeFormat24HFlow = dataStore.data.map { it[TIME_FORMAT_24H] ?: true }
 
     val lastNotifiedStreakFlow = dataStore.data.map { it[LAST_NOTIFIED_STREAK] ?: 0 }
+
+    val hasCompletedOnboarding = dataStore.data.map { it[HAS_COMPLETED_ONBOARDING] ?: false }
+
+    suspend fun setOnboardingCompleted() {
+        dataStore.edit { it[HAS_COMPLETED_ONBOARDING] = true }
+    }
 }

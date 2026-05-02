@@ -14,6 +14,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
@@ -22,6 +25,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.orhanobut.logger.Logger
 import dev.notsatria.stop_pmo.data.preference.SettingsDataStore
+import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
 import dev.notsatria.stop_pmo.navigation.PMONavHost
 import dev.notsatria.stop_pmo.navigation.Screen
 import dev.notsatria.stop_pmo.ui.components.BottomNavBar
@@ -32,6 +36,8 @@ import dev.notsatria.stop_pmo.utils.DebugEnqueueReceiver
 import dev.notsatria.stop_pmo.utils.UiMode
 import dev.notsatria.stop_pmo.worker.WorkScheduler
 import dev.notsatria.stop_pmo.worker.scheduleDailyStreakCheck
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import org.koin.compose.koinInject
 
 class MainActivity : ComponentActivity() {
@@ -67,6 +73,8 @@ private fun StopPmoApp(
     intent: Intent
 ) {
     val settingsDataStore: SettingsDataStore = koinInject()
+    val repository: RelapseRepository = koinInject()
+
     val uiMode by settingsDataStore.uiModeFlow.collectAsState(initial = UiMode.DARK)
     val isStreakNotificationEnabled by settingsDataStore.notificationEnabledFlow.collectAsState(
         initial = false
@@ -78,6 +86,16 @@ private fun StopPmoApp(
     } else {
         WorkScheduler.cancelStreakCheckWork(context)
     }
+
+    @OptIn(kotlin.time.ExperimentalTime::class)
+    val startDestination by remember {
+        combine(
+            settingsDataStore.hasCompletedOnboarding,
+            repository.lastRelapseTimeFlow().map { it != null }
+        ) { completed, hasData ->
+            if (completed || hasData) Screen.Dashboard else Screen.Onboarding
+        }
+    }.collectAsState(initial = null)
 
     LaunchedEffect(Unit) {
         intent.getStringExtra("nav_target").let { target ->
@@ -113,7 +131,13 @@ private fun StopPmoApp(
                     navController = navController
                 )
             }) { _ ->
-                PMONavHost(modifier = Modifier, navController = navController)
+                startDestination?.let { destination ->
+                    PMONavHost(
+                        modifier = Modifier,
+                        navController = navController,
+                        startDestination = destination
+                    )
+                }
             }
         }
     }
