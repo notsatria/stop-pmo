@@ -54,6 +54,7 @@ fun String.toDayAgo(): String {
 
 val defaultDateFormat = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
 val dateFormat1 = SimpleDateFormat("dd MMM", Locale.ENGLISH)
+val dateFormat2 = SimpleDateFormat("dd/MM", Locale.ENGLISH)
 val timeFormat24H = SimpleDateFormat("HH:mm", Locale.ENGLISH)
 val timeFormat12H = SimpleDateFormat("hh:mm a", Locale.ENGLISH)
 
@@ -82,6 +83,17 @@ fun String.formatDateOnly(): String {
         val instant = Instant.parse(this)
         val date = Date(instant.toEpochMilliseconds())
         return dateFormat1.format(date)
+    } catch (_: Exception) {
+        return this
+    }
+}
+
+@OptIn(ExperimentalTime::class)
+fun String.formatDate(format: SimpleDateFormat): String {
+    try {
+        val instant = Instant.parse(this)
+        val date = Date(instant.toEpochMilliseconds())
+        return format.format(date)
     } catch (_: Exception) {
         return this
     }

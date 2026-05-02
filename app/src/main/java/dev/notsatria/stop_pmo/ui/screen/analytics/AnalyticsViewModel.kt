@@ -5,11 +5,23 @@ import androidx.lifecycle.viewModelScope
 import dev.notsatria.stop_pmo.domain.model.RelapseEvent
 import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
 import dev.notsatria.stop_pmo.utils.calculateCurrentStreak
+import dev.notsatria.stop_pmo.utils.dateFormat2
+import dev.notsatria.stop_pmo.utils.formatDate
 import dev.notsatria.stop_pmo.utils.formatDateOnly
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
 
 class AnalyticsViewModel(
     private val repository: RelapseRepository
@@ -25,18 +37,40 @@ class AnalyticsViewModel(
     private fun loadAnalyticsData() {
         viewModelScope.launch {
             repository.allRelapseFlow().collect { relapseEvents ->
+                _uiState.update { it.copy(isLoading = true) }
                 val streakData = calculateStreakData(relapseEvents)
-                val chartData = processChartData(streakData)
+                val selectedFilter = _uiState.value.selectedFilter
+                val chartData = withContext(Dispatchers.Default) {
+                    processChartData(
+                        streakData,
+                        selectedFilter
+                    )
+                }
+                val heatmapData =
+                    withContext(Dispatchers.Default) { processHeatmapData(relapseEvents) }
 
                 _uiState.update {
                     it.copy(
                         relapseEvents = relapseEvents,
                         streakData = streakData,
                         chartData = chartData,
+                        heatmapData = heatmapData,
                         isLoading = false
                     )
                 }
             }
+        }
+    }
+
+    fun onFilterSelected(filter: DateFilter) {
+        val streakData = _uiState.value.streakData
+        val chartData = processChartData(streakData, filter)
+
+        _uiState.update {
+            it.copy(
+                selectedFilter = filter,
+                chartData = chartData
+            )
         }
     }
 
@@ -68,12 +102,75 @@ class AnalyticsViewModel(
         return streakList
     }
 
-    private fun processChartData(streakData: List<StreakData>): List<ChartDataPoint> {
-        return streakData.map { streak ->
+    @OptIn(ExperimentalTime::class)
+    private fun processChartData(
+        streakData: List<StreakData>,
+        filter: DateFilter
+    ): List<ChartDataPoint> {
+        val filtered = if (filter.days != null) {
+            val today = kotlin.time.Clock.System.now()
+                .toLocalDateTime(TimeZone.currentSystemDefault()).date
+            val cutoff = today.minus(DatePeriod(days = filter.days))
+            streakData.filter { streak ->
+                try {
+                    val relapseDate = kotlinx.datetime.Instant.parse(streak.relapseDate)
+                        .toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    relapseDate >= cutoff
+                } catch (_: Exception) {
+                    true
+                }
+            }
+        } else {
+            streakData
+        }
+
+        return filtered.map { streak ->
             ChartDataPoint(
                 y = streak.streakDays.toFloat(),
-                date = streak.relapseDate.formatDateOnly()
+                date = streak.relapseDate.formatDate(dateFormat2)
             )
         }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun processHeatmapData(events: List<RelapseEvent>): List<HeatmapDay> {
+        val today = kotlin.time.Clock.System.now()
+            .toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val startDate = today.minus(DatePeriod(days = 364))
+
+        val relapseDates = mutableSetOf<LocalDate>()
+        for (event in events) {
+            try {
+                val date = kotlinx.datetime.Instant.parse(event.occurredAt)
+                    .toLocalDateTime(TimeZone.currentSystemDefault()).date
+                relapseDates.add(date)
+            } catch (_: Exception) {
+                // Skip invalid dates
+            }
+        }
+
+        val heatmapDays = mutableListOf<HeatmapDay>()
+        var currentStreak = 0
+        var date = startDate
+
+        while (date <= today) {
+            val isRelapse = date in relapseDates
+            if (isRelapse) {
+                currentStreak = 0
+            }
+            heatmapDays.add(
+                HeatmapDay(
+                    date = date,
+                    streakDays = currentStreak,
+                    isRelapse = isRelapse
+                )
+            )
+            if (!isRelapse) {
+                currentStreak++
+            }
+            date = date.plus(DatePeriod(days = 1))
+        }
+
+        return heatmapDays
     }
 }
