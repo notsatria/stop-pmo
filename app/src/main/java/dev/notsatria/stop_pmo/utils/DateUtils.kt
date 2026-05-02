@@ -57,6 +57,22 @@ val dateFormat1 = SimpleDateFormat("dd MMM", Locale.ENGLISH)
 val timeFormat24H = SimpleDateFormat("HH:mm", Locale.ENGLISH)
 val timeFormat12H = SimpleDateFormat("hh:mm a", Locale.ENGLISH)
 
+fun Date.formatDate(use24Hour: Boolean): String {
+    try {
+        val result = buildString {
+            append(defaultDateFormat.format(this@formatDate))
+            append(" ")
+            append("at")
+            append(" ")
+            if (use24Hour) append(timeFormat24H.format(this@formatDate))
+            else append(timeFormat12H.format(this@formatDate))
+        }
+        return result
+    } catch (_: Exception) {
+        return ""
+    }
+}
+
 @OptIn(ExperimentalTime::class)
 fun String.formatDate(use24Hour: Boolean): String {
     try {

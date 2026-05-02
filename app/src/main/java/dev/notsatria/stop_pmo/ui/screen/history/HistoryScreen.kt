@@ -28,6 +28,7 @@ import dev.notsatria.stop_pmo.ui.components.HistoryItem
 import dev.notsatria.stop_pmo.ui.components.HistoryItemType
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 import dev.notsatria.stop_pmo.utils.DummyData
+import dev.notsatria.stop_pmo.utils.getBottomNavHeight
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 
@@ -117,6 +118,10 @@ fun HistoryScreen(
                         isButtonRelapseVisible = true
                     )
                 }
+            }
+
+            item {
+                Spacer(Modifier.height(getBottomNavHeight() + 60.dp))
             }
         }
     }
