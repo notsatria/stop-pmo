@@ -20,7 +20,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
 import dev.notsatria.stop_pmo.ui.components.EmptyStateView
 import dev.notsatria.stop_pmo.ui.components.HistoryItem
@@ -46,12 +46,15 @@ import dev.notsatria.stop_pmo.utils.DummyData
 import dev.notsatria.stop_pmo.utils.getBottomNavHeight
 import dev.notsatria.stop_pmo.utils.toHHmmss
 import org.koin.androidx.compose.koinViewModel
+import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun DashboardRoute(modifier: Modifier = Modifier, viewModel: DashboardViewModel = koinViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val use24HourFormat by viewModel.use24HourFormat.collectAsStateWithLifecycle(false)
 
     DashboardScreen(
         modifier = modifier,
@@ -62,15 +65,23 @@ fun DashboardRoute(modifier: Modifier = Modifier, viewModel: DashboardViewModel 
         showConfirmationDialog = viewModel.showConfirmationDialog,
         currentDialogStep = viewModel.currentDialogStep,
         relapseReason = viewModel.relapseReason,
+        selectedRelapseTime = viewModel.selectedRelapseTime,
+        use24HourFormat = use24HourFormat,
         onDismissDialog = { viewModel.dismissDialog() },
-        onConfirmRelapse = { viewModel.moveToReasonStep() },
+        onConfirmRelapse = { viewModel.moveToDateTimeStep() },
+        onNextToReason = { viewModel.moveToReasonStep() },
         onReasonChange = { viewModel.updateRelapseReason(it) },
         onBackToConfirmation = { viewModel.moveBackToConfirmation() },
-        onSubmitRelapse = { viewModel.submitRelapse() }
+        onBackToDateTime = { viewModel.moveToDateTimeStep() },
+        onSubmitRelapse = { viewModel.submitRelapse() },
+        onDateTimeChange = { viewModel.updateSelectedRelapseTime(it) }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalTime::class
+)
 @Composable
 fun DashboardScreen(
     modifier: Modifier = Modifier,
@@ -79,11 +90,16 @@ fun DashboardScreen(
     showConfirmationDialog: Boolean = false,
     currentDialogStep: RelapseDialogStep = RelapseDialogStep.CONFIRMATION,
     relapseReason: String = "",
+    selectedRelapseTime: kotlin.time.Instant = Clock.System.now(),
+    use24HourFormat: Boolean = true,
     onDismissDialog: () -> Unit = {},
     onConfirmRelapse: () -> Unit = {},
+    onNextToReason: () -> Unit = {},
     onReasonChange: (String) -> Unit = {},
     onBackToConfirmation: () -> Unit = {},
+    onBackToDateTime: () -> Unit = {},
     onSubmitRelapse: () -> Unit = {},
+    onDateTimeChange: (kotlin.time.Instant) -> Unit = {},
     theme: CustomTheme = LocalTheme.current,
 ) {
     Scaffold(modifier, topBar = {
@@ -148,12 +164,17 @@ fun DashboardScreen(
             RelapseConfirmationDialog(
                 currentStep = currentDialogStep,
                 relapseReason = relapseReason,
+                selectedRelapseTime = selectedRelapseTime,
+                use24HourFormat = use24HourFormat,
                 onDismiss = onDismissDialog,
                 onConfirmRelapse = onConfirmRelapse,
+                onNextToReason = onNextToReason,
                 onStillGoing = onDismissDialog,
                 onBackToConfirmation = onBackToConfirmation,
+                onBackToDateTime = onBackToDateTime,
                 onReasonChange = onReasonChange,
-                onSubmitRelapse = onSubmitRelapse
+                onSubmitRelapse = onSubmitRelapse,
+                onDateTimeChange = onDateTimeChange
             )
         }
     }
@@ -203,6 +224,7 @@ private fun DayCounter(modifier: Modifier = Modifier, duration: Duration) {
     }
 }
 
+@OptIn(ExperimentalTime::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun PreviewDark() {
@@ -211,6 +233,7 @@ private fun PreviewDark() {
     }
 }
 
+@OptIn(ExperimentalTime::class)
 @Preview
 @Composable
 private fun EmptyPreview() {
