@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "dev.notsatria.stop_pmo"
+    namespace = "com.notsatria.reboot"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "dev.notsatria.stop_pmo"
+        applicationId = "com.notsatria.reboot"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

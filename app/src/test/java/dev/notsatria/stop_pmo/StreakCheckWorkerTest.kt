@@ -58,7 +58,7 @@ class StreakCheckWorkerTest : KoinTest {
 
         val result = worker.doWork()
 
-        assertEquals(androidx.work.ListenableWorker.Result.success(), result)
+        assertEquals(ListenableWorker.Result.success(), result)
     }
 
 
