@@ -9,6 +9,7 @@ import dev.notsatria.stop_pmo.domain.repository.RelapseRepository
 import dev.notsatria.stop_pmo.ui.screen.analytics.AnalyticsViewModel
 import dev.notsatria.stop_pmo.ui.screen.dashboard.DashboardViewModel
 import dev.notsatria.stop_pmo.ui.screen.history.HistoryViewModel
+import dev.notsatria.stop_pmo.ui.screen.onboarding.OnboardingViewModel
 import dev.notsatria.stop_pmo.ui.screen.settings.SettingsViewModel
 import dev.notsatria.stop_pmo.worker.StreakCheckWorker
 import org.koin.android.ext.koin.androidContext
@@ -34,6 +35,7 @@ val appModule = module {
     viewModelOf(::HistoryViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::AnalyticsViewModel)
+    viewModelOf(::OnboardingViewModel)
 
     // Preference
     single<SettingsDataStore> {

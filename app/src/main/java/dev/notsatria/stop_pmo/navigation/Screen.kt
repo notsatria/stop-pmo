@@ -14,4 +14,6 @@ sealed class Screen {
     object History : Screen()
     @Serializable
     data class Streak(val streakCount: Int) : Screen()
+    @Serializable
+    data object Onboarding : Screen()
 }
