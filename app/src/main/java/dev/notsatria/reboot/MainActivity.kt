@@ -20,7 +20,6 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.work.WorkManager
 import com.orhanobut.logger.Logger
 import dev.notsatria.stop_pmo.data.preference.SettingsDataStore
 import dev.notsatria.stop_pmo.navigation.PMONavHost
