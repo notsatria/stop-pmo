@@ -1,14 +1,20 @@
 package dev.notsatria.stop_pmo.ui.screen.settings
 
+import android.app.ActivityManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Build
+import android.os.Environment
+import android.os.StatFs
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,14 +28,22 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,7 +62,7 @@ import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 import dev.notsatria.stop_pmo.utils.DebugWorkScheduler
 import dev.notsatria.stop_pmo.utils.UiMode
 import org.koin.androidx.compose.koinViewModel
-import kotlin.text.compareTo
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -63,7 +77,6 @@ fun SettingRoute(
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
-                // Permission Granted
                 viewModel.toggleNotifications(true)
             } else {
                 viewModel.toggleNotifications(false)
@@ -90,10 +103,16 @@ fun SettingRoute(
                 }
             }
         },
+        onItemClick = { title ->
+            when (title) {
+                SettingsTitle.SEND_FEEDBACK -> { /* handled inside SettingScreen */ }
+            }
+        },
         navigateToStreakScreen = navigateToStreakScreen
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SettingScreen(
@@ -101,9 +120,11 @@ fun SettingScreen(
     context: Context = LocalContext.current,
     uiState: SettingState = SettingState(),
     onToggle: ((isEnabled: Boolean, title: String) -> Unit)? = null,
+    onItemClick: (String) -> Unit = {},
     navigateToStreakScreen: () -> Unit = {}
 ) {
     val theme = LocalTheme.current
+    var showFeedbackDialog by remember { mutableStateOf(false) }
 
     val groupedSettings = remember(uiState) { uiState.settings.groupBy { it.group } }
 
@@ -171,6 +192,13 @@ fun SettingScreen(
                                 Row(
                                     Modifier
                                         .fillMaxWidth()
+                                        .clickable {
+                                            if (setting.title == SettingsTitle.SEND_FEEDBACK) {
+                                                showFeedbackDialog = true
+                                            } else {
+                                                onItemClick(setting.title)
+                                            }
+                                        }
                                         .padding(vertical = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -246,6 +274,13 @@ fun SettingScreen(
             item { Spacer(Modifier.height(innerPadding.calculateBottomPadding() + 20.dp)) }
         }
     }
+
+    if (showFeedbackDialog) {
+        FeedbackDialog(
+            context = context,
+            onDismiss = { showFeedbackDialog = false }
+        )
+    }
 }
 
 private fun handleNotificationPermission(
@@ -300,6 +335,152 @@ private fun GroupHeader(title: String, style: TextStyle) {
     Column {
         Text(title, style = style)
         Spacer(Modifier.height(12.dp))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FeedbackDialog(
+    context: Context,
+    onDismiss: () -> Unit
+) {
+    val theme = LocalTheme.current
+    var feedbackText by remember { mutableStateOf("") }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = theme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 32.dp)
+        ) {
+            Text(
+                text = "Send Feedback",
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = theme.textPrimary
+                )
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "We'd love to hear your thoughts or report an issue.",
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    color = theme.textSecondary
+                )
+            )
+            Spacer(Modifier.height(16.dp))
+            OutlinedTextField(
+                value = feedbackText,
+                onValueChange = { feedbackText = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                placeholder = {
+                    Text("Type your feedback here...", color = theme.textSecondary)
+                },
+                textStyle = TextStyle(
+                    fontSize = 14.sp,
+                    color = theme.textPrimary
+                )
+            )
+            Spacer(Modifier.height(20.dp))
+            Button(
+                onClick = {
+                    if (feedbackText.isNotBlank()) {
+                        launchFeedbackEmail(context, feedbackText.trim())
+                        onDismiss()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = feedbackText.isNotBlank(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = theme.buttonPrimary,
+                    disabledContainerColor = theme.buttonDisabled
+                )
+            ) {
+                Text("Submit", fontWeight = FontWeight.SemiBold)
+            }
+            Spacer(Modifier.height(4.dp))
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Cancel", color = theme.textSecondary)
+            }
+        }
+    }
+}
+
+private fun launchFeedbackEmail(context: Context, feedback: String) {
+    val deviceInfo = buildDeviceInfoString(context)
+    val body = """
+        |$deviceInfo
+        |
+        |Feedback:
+        |$feedback
+    """.trimMargin()
+
+    val intent = Intent(Intent.ACTION_SENDTO).apply {
+        data = Uri.parse("mailto:")
+        putExtra(Intent.EXTRA_EMAIL, arrayOf("notsatria.dev@gmail.com"))
+        putExtra(Intent.EXTRA_SUBJECT, "[StopPMO] Feedback")
+        putExtra(Intent.EXTRA_TEXT, body)
+    }
+
+    try {
+        context.startActivity(intent)
+    } catch (_: Exception) {
+        // No email app available
+    }
+}
+
+private fun buildDeviceInfoString(context: Context): String {
+    val device = "${Build.MANUFACTURER} ${Build.MODEL}"
+
+    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    val memInfo = ActivityManager.MemoryInfo()
+    activityManager.getMemoryInfo(memInfo)
+    val totalRam = formatBytes(memInfo.totalMem)
+    val availRam = formatBytes(memInfo.availMem)
+
+    val stat = StatFs(Environment.getDataDirectory().path)
+    val totalStorage = formatBytes(stat.totalBytes)
+    val availStorage = formatBytes(stat.availableBytes)
+
+    val androidVersion = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})"
+
+    val appVersion = try {
+        val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+        packageInfo.versionName ?: "unknown"
+    } catch (_: PackageManager.NameNotFoundException) {
+        "unknown"
+    }
+
+    return """
+        |Device: $device
+        |RAM: $totalRam (Free: $availRam)
+        |Storage: $totalStorage (Available: $availStorage)
+        |Android Version: $androidVersion
+        |App Version: $appVersion
+    """.trimMargin()
+}
+
+private fun formatBytes(bytes: Long): String {
+    val gb = bytes / (1024.0 * 1024.0 * 1024.0)
+    return if (gb >= 1.0) {
+        "%.1f GB".format(gb)
+    } else {
+        val mb = bytes / (1024.0 * 1024.0)
+        "%.0f MB".format(mb)
     }
 }
 
