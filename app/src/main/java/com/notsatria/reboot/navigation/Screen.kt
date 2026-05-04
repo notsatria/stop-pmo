@@ -1,0 +1,21 @@
+package com.notsatria.reboot.navigation
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed class Screen {
+    @Serializable
+    object Dashboard : Screen()
+    @Serializable
+    object Analytics : Screen()
+    @Serializable
+    object Settings : Screen()
+    @Serializable
+    object History : Screen()
+    @Serializable
+    data class Streak(val streakCount: Int) : Screen()
+    @Serializable
+    data object Onboarding : Screen()
+    @Serializable
+    data class WebView(val url: String, val title: String) : Screen()
+}
