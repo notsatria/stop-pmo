@@ -16,4 +16,6 @@ sealed class Screen {
     data class Streak(val streakCount: Int) : Screen()
     @Serializable
     data object Onboarding : Screen()
+    @Serializable
+    data class WebView(val url: String, val title: String) : Screen()
 }

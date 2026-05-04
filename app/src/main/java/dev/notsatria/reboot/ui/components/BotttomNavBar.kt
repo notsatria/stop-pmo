@@ -24,7 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import dev.notsatria.stop_pmo.R
+import com.notsatria.reboot.R
 import dev.notsatria.stop_pmo.navigation.NavItem
 import dev.notsatria.stop_pmo.navigation.Screen
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme

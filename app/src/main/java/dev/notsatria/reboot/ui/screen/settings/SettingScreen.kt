@@ -55,8 +55,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import dev.notsatria.stop_pmo.BuildConfig
-import dev.notsatria.stop_pmo.R
+import com.notsatria.reboot.R
+import com.orhanobut.logger.BuildConfig
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 import dev.notsatria.stop_pmo.utils.DebugWorkScheduler
@@ -69,7 +69,8 @@ import org.koin.androidx.compose.koinViewModel
 fun SettingRoute(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = koinViewModel(),
-    navigateToStreakScreen: () -> Unit = {}
+    navigateToStreakScreen: () -> Unit = {},
+    navigateToWebView: (url: String, title: String) -> Unit = { _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -106,6 +107,12 @@ fun SettingRoute(
         onItemClick = { title ->
             when (title) {
                 SettingsTitle.SEND_FEEDBACK -> { /* handled inside SettingScreen */ }
+                SettingsTitle.PRIVACY_POLICY -> {
+                    navigateToWebView("https://reboot.notsatria.com/privacy-policy", "Privacy Policy")
+                }
+                SettingsTitle.TERMS_OF_SERVICE -> {
+                    navigateToWebView("https://reboot.notsatria.com/terms-of-service", "Terms of Service")
+                }
             }
         },
         navigateToStreakScreen = navigateToStreakScreen

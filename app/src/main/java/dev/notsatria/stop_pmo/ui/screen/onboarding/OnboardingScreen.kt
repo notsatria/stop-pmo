@@ -41,7 +41,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import dev.notsatria.stop_pmo.R
+import com.notsatria.reboot.R
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel

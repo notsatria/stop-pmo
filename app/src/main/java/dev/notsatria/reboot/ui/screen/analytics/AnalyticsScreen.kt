@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import dev.notsatria.stop_pmo.R
+import com.notsatria.reboot.R
 import dev.notsatria.stop_pmo.ui.components.CenterTopBar
 import dev.notsatria.stop_pmo.ui.theme.CustomTheme
 import dev.notsatria.stop_pmo.ui.theme.LocalTheme

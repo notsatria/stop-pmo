@@ -20,12 +20,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import dev.notsatria.stop_pmo.MainActivity
-import dev.notsatria.stop_pmo.R
 import dev.notsatria.stop_pmo.utils.StreakNotification.CHANNEL_ID
 import dev.notsatria.stop_pmo.utils.StreakNotification.NOTIFICATION_ID
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import androidx.core.net.toUri
+import com.notsatria.reboot.R
 
 @OptIn(ExperimentalTime::class)
 fun getCurrentStreak(
